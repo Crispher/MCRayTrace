@@ -1,0 +1,9 @@
+﻿  Sampler.cpp
+C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\opencv\build\include\opencv2/core/mat.hpp(1965): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\opencv\build\include\opencv2/core/persistence.hpp : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\opencv\build\include\opencv2/core/utility.hpp : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+Sampler.cpp(46): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+Sampler.cpp(66): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+Sampler.cpp(90): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+Sampler.cpp(115): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+  MCRayTrace.vcxproj -> C:\Users\Crispher Gu\Desktop\MCRayTrace\x64\Debug\MCRayTrace.exe
