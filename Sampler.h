@@ -3,12 +3,15 @@
 #include "Screen.h"
 #include "Object.h"
 #include "Scene.h"
+#include "IntersectionTester.h"
+enum rayType {RE_D, RE_S, TR_D, TR_S};
 
 struct Sample {
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-		Vector3R v;
+	Vector3R v;
 	Color radiance;
 	Real weight;
+	rayType type = RE_D;
 };
 
 struct Sample2R {
@@ -69,6 +72,9 @@ public:
 	// get a single sample
 	Vector3R sample_Diffuse_P(const Vector3R&);
 	Vector3R sample_Specular_P(const Vector3R&, const Vector3R&, int N);
+
+	// get a single sample
+	Sample sample(const Vector3R &in, const Vector3R &normal, const MaterialPtr &mPtr);
 };
 
 class StratifiedSampler : public Sampler {

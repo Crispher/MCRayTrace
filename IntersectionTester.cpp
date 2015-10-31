@@ -17,7 +17,7 @@ void IntersectionTester::basicIntersectionTest(const Ray &ray, const F& face,
 		return;
 	}
 	Real u = P.dot(T) / det;
-	if (u < -Limit::Epsilon || u > 1 + Limit::Epsilon) {
+	if (u > 1 + Limit::Epsilon || u < -Limit::Epsilon) {
 		return;
 	}
 	Vector3R Q = T.cross(E1);

@@ -140,7 +140,8 @@ void Object::loadMtl(const char* filename) {
 			x = boost::lexical_cast<Real>(argv[1]);
 			y = boost::lexical_cast<Real>(argv[2]);
 			z = boost::lexical_cast<Real>(argv[3]);
-			mPtr->Kd = vector < Real > {x, y, z};
+			Real e = (x + y + z) / 3;
+			mPtr->Kd = vector < Real > {x, y, z, e};
 			continue;
 		}
 		if (argv[0] == "Ks" && toggle) {
@@ -148,7 +149,8 @@ void Object::loadMtl(const char* filename) {
 			x = boost::lexical_cast<Real>(argv[1]);
 			y = boost::lexical_cast<Real>(argv[2]);
 			z = boost::lexical_cast<Real>(argv[3]);
-			mPtr->Ks = vector < Real > {x, y, z};
+			Real e = (x + y + z) / 3;
+			mPtr->Ks = vector < Real > {x, y, z, e};
 			continue;
 		}
 		if (argv[0] == "Ns" && toggle) {
@@ -164,7 +166,8 @@ void Object::loadMtl(const char* filename) {
 			x = boost::lexical_cast<Real>(argv[1]);
 			y = boost::lexical_cast<Real>(argv[2]);
 			z = boost::lexical_cast<Real>(argv[3]);
-			mPtr->Td = vector < Real > {x, y, z};
+			Real e = (x + y + z) / 3;
+			mPtr->Td = vector < Real > {x, y, z, e};
 			continue;
 		}
 		if (argv[0] == "Ts" && toggle) {
@@ -172,7 +175,8 @@ void Object::loadMtl(const char* filename) {
 			x = boost::lexical_cast<Real>(argv[1]);
 			y = boost::lexical_cast<Real>(argv[2]);
 			z = boost::lexical_cast<Real>(argv[3]);
-			mPtr->Ts = vector < Real > {x, y, z};
+			Real e = (x + y + z) / 3;
+			mPtr->Ts = vector < Real > {x, y, z, e};
 			continue;
 		}
 		if (argv[0] == "Nst" && toggle) {

@@ -2,24 +2,16 @@
 C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\opencv\build\include\opencv2/core/mat.hpp(1965): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
 C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\opencv\build\include\opencv2/core/persistence.hpp : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
 C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\opencv\build\include\opencv2/core/utility.hpp : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
-RayTracer.cpp(33): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-RayTracer.cpp(41): warning C4244: 'argument' : conversion from 'Real' to 'int', possible loss of data
-RayTracer.cpp(42): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
-RayTracer.cpp(56): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-RayTracer.cpp(65): warning C4244: 'argument' : conversion from 'Real' to 'int', possible loss of data
-RayTracer.cpp(66): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
-RayTracer.cpp(80): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-RayTracer.cpp(92): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-RayTracer.cpp(105): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-RayTracer.cpp(117): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-  Sampler.cpp
-C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\opencv\build\include\opencv2/core/mat.hpp(1965): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
-C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\opencv\build\include\opencv2/core/persistence.hpp : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
-C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\opencv\build\include\opencv2/core/utility.hpp : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
-Sampler.cpp(46): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
-Sampler.cpp(66): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
-Sampler.cpp(90): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
-Sampler.cpp(121): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+RayTracer.cpp(30): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+RayTracer.cpp(38): warning C4244: 'argument' : conversion from 'Real' to 'int', possible loss of data
+RayTracer.cpp(39): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+RayTracer.cpp(53): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+RayTracer.cpp(62): warning C4244: 'argument' : conversion from 'Real' to 'int', possible loss of data
+RayTracer.cpp(63): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+RayTracer.cpp(104): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+RayTracer.cpp(116): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+RayTracer.cpp(128): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+RayTracer.cpp(140): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
   Generating code
 c:\users\crispher gu\desktop\mcraytrace\mcraytrace\intersectiontester.cpp(112): warning C4700: uninitialized local variable 'extraPtr' used
   Finished generating code

@@ -184,7 +184,7 @@ Vector3R Sampler::sample_Diffuse_P(const Vector3R &normal) {
 	Vector3R x = dummy.cross(normal).normalized();
 	Vector3R y = normal.cross(x);
 	PreSample &ps = presamples_Diffuse_Single.presamples[presamples_Diffuse_Single.cursor];
-	presamples_Diffuse_Single.cursor = (presamples_Diffuse_Single.cursor + 1) % presamples_Diffuse_Single.numGroups;
+	++presamples_Diffuse_Single.cursor %= presamples_Diffuse_Single.numGroups;
 	return (ps.x) * x + ps.y * y + ps.z * normal;
 }
 
@@ -194,8 +194,76 @@ Vector3R Sampler::sample_Specular_P(const Vector3R &out, const Vector3R &normal,
 	Vector3R y = normal.cross(x);
 	PreSamplePool &psp = presamples_Specular_Single[N];
 	PreSample &ps = psp.presamples[psp.cursor];
-	psp.cursor = (psp.cursor + 1) % psp.numGroups;
+	++psp.cursor %= psp.numGroups;
 	return (ps.x) * x + ps.y * y + ps.z * out;
+}
+
+Sample Sampler::sample(const Vector3R &in, const Vector3R &normal, const MaterialPtr &mPtr) {
+	Sample ans;
+	bool lookFromOutside = in.dot(normal) < 0;
+	if (lookFromOutside && mPtr->Tr < 0) {
+		// from outside, reflective diffuse and specular light
+		Real wd = (mPtr->Kd[3]) / (mPtr->Kd[3] + mPtr->Ks[3]);
+		if (uniform_01(gen) < wd) {
+			ans.type = RE_D;
+			ans.weight = wd;
+			ans.v = sample_Diffuse_P(normal);
+			return ans;
+		}
+		else {
+			ans.type = RE_S;
+			ans.weight = 1 - wd;
+			ans.v = sample_Specular_P(IntersectionTester::reflect(in, normal), normal, mPtr->Ns);
+			return ans;
+		}
+	}
+	else if (lookFromOutside && mPtr->Tr > 0) {
+		// look from outside, transparent material
+		Real total = (mPtr->Kd[3] + mPtr->Ks[3] + mPtr->Td[3] + mPtr->Ts[3]);
+		Real w, t = 0;
+		Real rand = uniform_01(gen);
+		if (rand < (t += (w = mPtr->Kd[3] / total))) {
+			ans.type = RE_D;
+			ans.weight = w;
+			ans.v = sample_Diffuse_P(normal);
+			return ans;
+		}
+		else if (rand < (t += (w = mPtr->Ks[3] / total))) {
+			ans.type = RE_S;
+			ans.weight = w;
+			ans.v = sample_Specular_P(IntersectionTester::reflect(in, normal), normal, mPtr->Ns);
+			return ans;
+		}
+		else if (rand < (t += (w = mPtr->Td[3] / total))) {
+			ans.type = TR_D;
+			ans.weight = w;
+			ans.v = sample_Diffuse_P(-normal);
+			return ans;
+		}
+		else {
+			ans.type = TR_S;
+			ans.weight = 1 - t;
+			ans.v = sample_Specular_P(IntersectionTester::refract(in, normal, mPtr->n), normal, mPtr->Nst);
+			return ans;
+		}
+	}
+	else {
+		// look from inside, transparent material
+		// to do: fresnel
+		Real wd = (mPtr->Td[3]) / (mPtr->Td[3] + mPtr->Ts[3]);
+		if (uniform_01(gen) < wd) {
+			ans.type = TR_D;
+			ans.weight = wd;
+			ans.v = sample_Diffuse_P(normal);
+			return ans;
+		}
+		else {
+			ans.type = TR_S;
+			ans.weight = 1 - wd;
+			ans.v = sample_Specular_P(IntersectionTester::refract(in, normal, mPtr->n), normal, mPtr->Ns);
+			return ans;
+		}
+	}
 }
 
 #pragma endregion

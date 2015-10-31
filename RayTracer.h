@@ -32,11 +32,12 @@ private:
 	Color integrateSpecular_Refract(const std::vector<Sample, Eigen::aligned_allocator<Vector3R>>&, const MaterialPtr &mPtr) const;
 
 	Color rayTrace_Single(const Ray&, int _depth);
-
-	inline Vector3R reflect(const Vector3R& in, const Vector3R& normal) const {
+	Color RussianRoulette(const Ray&, Real factor);
+	Color integrate(const Sample &s, const MaterialPtr &mPtr);
+	inline Vector3R reflect(const Vector3R& in, const Vector3R& normal) {
 		return in - 2 * in.dot(normal) * normal;
 	}
-	inline Vector3R refract(const Vector3R &in, const Vector3R &normal, Real n) const {
+	inline Vector3R refract(const Vector3R &in, const Vector3R &normal, Real n) {
 		Real cos_theta1 = in.dot(normal);
 		if (abs(cos_theta1) > 1 - Limit::Epsilon) {
 			// perpendicular to the surface

@@ -43,6 +43,12 @@ public:
 			green() * _g,
 			blue() * _b);
 	}
+	inline Color filter(const std::vector<Real> &k) const {
+		return filter(k[0], k[1], k[2]);
+	}
+	inline Color filter(const std::vector<Real> &k, Real w) const {
+		return filter(k[0] / w, k[1] / w, k[2] / w);
+	}
 	inline Color gammaCorrection(Real gamma) {
 		return Color(
 			255. * pow(r / 255., gamma),
