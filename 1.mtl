@@ -12,8 +12,9 @@ Kd 1 1 0.85
 Ks 0 0 0
 newmtl back
 Ka 0 0 0
-Kd 0.7 0.3 0.7
+Kd 0.8 0.4 0.8
 Ks 0 0 0
+texture f2.png
 newmtl floor
 Ka 0 0 0
 Kd 1 1 1

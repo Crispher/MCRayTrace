@@ -1,18 +1,36 @@
-﻿  RayTracer.cpp
-C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\opencv\build\include\opencv2/core/mat.hpp(1965): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
-C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\opencv\build\include\opencv2/core/persistence.hpp : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
-C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\opencv\build\include\opencv2/core/utility.hpp : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
-RayTracer.cpp(30): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-RayTracer.cpp(38): warning C4244: 'argument' : conversion from 'Real' to 'int', possible loss of data
-RayTracer.cpp(39): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
-RayTracer.cpp(53): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-RayTracer.cpp(62): warning C4244: 'argument' : conversion from 'Real' to 'int', possible loss of data
-RayTracer.cpp(63): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
-RayTracer.cpp(104): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-RayTracer.cpp(116): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-RayTracer.cpp(128): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-RayTracer.cpp(140): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-  Generating code
-c:\users\crispher gu\desktop\mcraytrace\mcraytrace\intersectiontester.cpp(112): warning C4700: uninitialized local variable 'extraPtr' used
-  Finished generating code
-  MCRayTrace.vcxproj -> C:\Users\Crispher Gu\Desktop\MCRayTrace\x64\Release\MCRayTrace.exe
+﻿Build started 11/5/2015 1:10:41 PM.
+     1>Project "C:\Users\Crispher Gu\Desktop\MCRayTrace\MCRayTrace\MCRayTrace.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /I"C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\opencv\build\include" /I"C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\boost_1_59_0" /I"C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\eigen-eigen-bdd17ee3b1b3" /Zi /nologo /W3 /WX- /O2 /Oi /Ot /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Release\\" /Fd"x64\Release\vc120.pdb" /Gd /TP /errorReport:prompt IntersectionTester.cpp RayTracer.cpp
+         IntersectionTester.cpp
+     1>IntersectionTester.cpp(131): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+     1>IntersectionTester.cpp(135): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+         RayTracer.cpp
+     1>RayTracer.cpp(30): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+     1>RayTracer.cpp(38): warning C4244: 'argument' : conversion from 'Real' to 'int', possible loss of data
+     1>RayTracer.cpp(39): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+     1>RayTracer.cpp(53): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+     1>RayTracer.cpp(62): warning C4244: 'argument' : conversion from 'Real' to 'int', possible loss of data
+     1>RayTracer.cpp(63): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+     1>RayTracer.cpp(111): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+     1>RayTracer.cpp(123): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+     1>RayTracer.cpp(135): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+     1>RayTracer.cpp(147): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Crispher Gu\Desktop\MCRayTrace\x64\Release\MCRayTrace.exe" /INCREMENTAL:NO /NOLOGO "C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\opencv\build\x64\vc12\lib\opencv_ts300.lib" "C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\opencv\build\x64\vc12\lib\opencv_world300.lib" kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Crispher Gu\Desktop\MCRayTrace\x64\Release\MCRayTrace.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Crispher Gu\Desktop\MCRayTrace\x64\Release\MCRayTrace.lib" /MACHINE:X64 x64\Release\BRDF.obj
+         x64\Release\IntersectionTester.obj
+         x64\Release\main.obj
+         x64\Release\Object.obj
+         x64\Release\RayTracer.obj
+         x64\Release\Renderer.obj
+         x64\Release\Sampler.obj
+         x64\Release\Scene.obj
+         x64\Release\Screen.obj
+         Generating code
+         Finished generating code
+         MCRayTrace.vcxproj -> C:\Users\Crispher Gu\Desktop\MCRayTrace\x64\Release\MCRayTrace.exe
+     1>Done Building Project "C:\Users\Crispher Gu\Desktop\MCRayTrace\MCRayTrace\MCRayTrace.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:12.93

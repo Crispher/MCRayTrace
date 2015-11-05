@@ -10,8 +10,8 @@ public:
 	IntersectionTester() {};
 	~IntersectionTester() {};
 
-	void basicIntersectionTest(const Ray &ray, const F&, bool &intersected, Real &distance, Vector3R &normal, MaterialPtr &mPtr, Real *extra);
-	void basicIntersectionTest(const Ray &ray, const Sphere&, bool &intersected, Real &distance, Vector3R &normal, MaterialPtr &mPtr, Real *extra);
+	void basicIntersectionTest(const Ray &ray, const F&, bool &intersected, Real &distance, Vector3R &normal, MaterialPtr &mPtr);
+	void basicIntersectionTest(const Ray &ray, const Sphere&, bool &intersected, Real &distance, Vector3R &normal, MaterialPtr &mPtr);
 
 	virtual void intersectionTest(const Ray&, bool &intersected, Real &distance, Vector3R &normal, MaterialPtr &mPtr) = 0;
 

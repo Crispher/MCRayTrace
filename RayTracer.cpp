@@ -9,7 +9,7 @@ Color MonteCarloRayTracer::rayTrace(const Ray& ray, int _depth) {
 	bool intersected = false;
 	Real distance = Limit::Infinity;
 	Vector3R normal;
-	MaterialPtr mPtr;
+	MaterialPtr mPtr = nullptr;
 	intersectionTesterPtr->intersectionTest(ray, intersected, distance, normal, mPtr);
 	if (!intersected) {
 		return Colors::black;
@@ -68,19 +68,22 @@ Color MonteCarloRayTracer::rayTrace(const Ray& ray, int _depth) {
 			ans += integrateSpecular_Refract(samples_specular_r, mPtr);
 		}
 	}
+	if (mPtr->textureMode == TEXTURE) {
+		delete mPtr;
+	}
 	return ans;
 }
 
 Color MonteCarloRayTracer::rayTrace_Single(const Ray& ray, int _depth) {
 	if (_depth == 0) {
-		//return Colors::black;
-		return RussianRoulette(ray, 0.5);
+		return Colors::black;
+		//return RussianRoulette(ray, 0.5);
 	}
 
 	bool intersected = false;
 	Real distance = Limit::Infinity;
 	Vector3R normal;
-	MaterialPtr mPtr;
+	MaterialPtr mPtr = nullptr;
 	intersectionTesterPtr->intersectionTest(ray, intersected, distance, normal, mPtr);
 	if (!intersected) {
 		return Colors::black;
@@ -95,7 +98,11 @@ Color MonteCarloRayTracer::rayTrace_Single(const Ray& ray, int _depth) {
 	Sample s = samplerPtr->sample(ray.direction, normal, mPtr);
 	Ray _ray(pos, s.v);
 	s.radiance = rayTrace_Single(_ray, _depth - 1);
-	return integrate(s, mPtr);
+	ans = integrate(s, mPtr);
+	if (mPtr->textureMode == TEXTURE) {
+		delete mPtr;
+	}
+	return ans;
 }
 
 Color MonteCarloRayTracer::integrateDiffuse_Reflect(const std::vector<Sample, Eigen::aligned_allocator<Vector3R>> &samples, 

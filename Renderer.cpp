@@ -147,10 +147,10 @@ void ImageRenderer::renderImageThreading(ThreadingTask &task) {
 		exit(-1);
 	}
 
-	mcrt.samplerPtr->generatePreSample_Specular(1, 77779, 1000);
-	mcrt.samplerPtr->generatePreSample_Diffuse(1, 77779);
-	mcrt.samplerPtr->generatePreSample_Diffuse_Single(77797);
-	mcrt.samplerPtr->generatePreSample_Specular_Single(77977, 1000);
+	mcrt.samplerPtr->generatePreSample_Specular(1, 777793, 1000);
+	mcrt.samplerPtr->generatePreSample_Diffuse(1, 777379);
+	mcrt.samplerPtr->generatePreSample_Diffuse_Single(737797);
+	mcrt.samplerPtr->generatePreSample_Specular_Single(717977, 1000);
 
 	sit.scenePtr = renderSetting->scenePtr;
 

@@ -28,15 +28,32 @@ F::F(std::string s1, std::string s2, std::string s3) {
 
 void Texture::loadBump(const char* filename) {
 	cv::Mat image = cv::imread(filename, CV_LOAD_IMAGE_GRAYSCALE);
-	bumpW = image.cols, bumpH = image.rows;
-	bump = std::vector<std::vector<Real>>(bumpW);
-	for (int i = 0; i < bumpW; i++) {
-		bump[i] = std::vector<Real>(bumpH);
+	W = image.cols; H = image.rows;
+	bump = std::vector<std::vector<Real>>(W);
+	for (int i = 0; i < W; i++) {
+		bump[i] = std::vector<Real>(H);
 	}
-	for (int _w = 0; _w < bumpW; _w++) {
-		for (int _h = 0; _h < bumpH	; _h++) {
-			bump[_w][_h] = image.at<uchar>(bumpH - _h - 1, _w);
+	for (int _w = 0; _w < W; _w++) {
+		for (int _h = 0; _h < H	; _h++) {
+			bump[_w][_h] = image.at<uchar>(H - _h - 1, _w);
 			bump[_w][_h] /= 255.0;
+		}
+	}
+}
+
+void Texture::loadTexture(const char* filename) {
+	cv::Mat image = cv::imread(filename, CV_LOAD_IMAGE_COLOR);
+	W = image.cols; H = image.rows;
+	texture = std::vector<std::vector<std::vector<Real>>>(W);
+	for (int i = 0; i < W; i++) {
+		texture[i] = std::vector<std::vector<Real>>(H, std::vector<Real>(3));
+	}
+	for (int _w = 0; _w < W; _w++) {
+		for (int _h = 0; _h < H; _h++) {
+			cv::Vec3b t = image.at<cv::Vec3b>(H - _h - 1, _w);
+			texture[_w][_h][0] = t[2] / 255.0;
+			texture[_w][_h][1] = t[1] / 255.0;
+			texture[_w][_h][2] = t[2] / 255.0;
 		}
 	}
 }
@@ -191,6 +208,12 @@ void Object::loadMtl(const char* filename) {
 			mPtr->textureMode = BUMP;
 			mPtr->texturePtr = new Texture();
 			mPtr->texturePtr->loadBump(argv[1].c_str());
+			continue;
+		}
+		if (argv[0] == "texture" && toggle) {
+			mPtr->textureMode = TEXTURE;
+			mPtr->texturePtr = new Texture();
+			mPtr->texturePtr->loadTexture(argv[1].c_str());
 			continue;
 		}
 		if (argv[0] == "BRDF" && toggle) {

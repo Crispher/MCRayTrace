@@ -74,8 +74,10 @@ class Texture {
 public:
 	Texture() {}
 	std::vector<std::vector<Real>> bump;
+	std::vector<std::vector<std::vector<Real>>> texture;
 	void loadBump(const char*);
-	int bumpH, bumpW;
+	void loadTexture(const char*);
+	int H, W;
 };
 
 enum TextureMode { NO_TEXTURE, BUMP, TEXTURE, BRDF_DEFINED };
