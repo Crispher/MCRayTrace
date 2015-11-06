@@ -7,10 +7,11 @@ A Monte Carlo ray tracer.
     - two samplers: stratified and latincube
     - kd-tree accelerator
     - bump mapping
-  - todo:
     - texture mapping
+  - todo:
     - sampling the lightsource at each reflection
     - handle more general brdf surfaces
+    - hemisphere lightsource
     - ...
   - dependency and environment configuration:
     - this project builds a ray tracer from scratch however 
