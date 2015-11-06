@@ -87,6 +87,7 @@ class Material
 public:
 	Material(){};
 	~Material(){};
+	Material(const Material&);
 	std::string name;
 	vector<Real> Ka, Kd, Ks, Td, Ts;
 	Real Ns = -1;

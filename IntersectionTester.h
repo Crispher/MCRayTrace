@@ -7,11 +7,17 @@ class IntersectionTester
 public:
 	Scene *scenePtr;
 
+	bool cacheIntersected;
+	Real cacheDistance;
+	Vector3R cacheNormal;
+	MaterialPtr cacheMPtr;
+	Real textureFilterR, textureFilterG, textureFilterB;
+
 	IntersectionTester() {};
 	~IntersectionTester() {};
 
-	void basicIntersectionTest(const Ray &ray, const F&, bool &intersected, Real &distance, Vector3R &normal, MaterialPtr &mPtr);
-	void basicIntersectionTest(const Ray &ray, const Sphere&, bool &intersected, Real &distance, Vector3R &normal, MaterialPtr &mPtr);
+	void basicIntersectionTest(const Ray &ray, const F&);
+	void basicIntersectionTest(const Ray &ray, const Sphere&);
 
 	virtual void intersectionTest(const Ray&, bool &intersected, Real &distance, Vector3R &normal, MaterialPtr &mPtr) = 0;
 

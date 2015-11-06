@@ -124,6 +124,19 @@ void Object::load(const char* filename) {
 	}
 }
 
+Material::Material(const Material& m) {
+	Ka = m.Ka; Kd = m.Kd; Ks = m.Ks;
+	Td = m.Td; Ts = m.Ts; 
+	name = m.name;
+	Ns = m.Ns;
+	Tr = m.Tr;
+	Nst = m.Nst;
+	n = m.n;
+	textureMode = m.textureMode;
+	texturePtr = m.texturePtr;
+	BRDFPtr = m.BRDFPtr;
+}
+
 void Object::loadMtl(const char* filename) {
 	std::ifstream in = std::ifstream(filename);
 	std::string line;

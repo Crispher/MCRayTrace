@@ -15,8 +15,9 @@ Color MonteCarloRayTracer::rayTrace(const Ray& ray, int _depth) {
 		return Colors::black;
 	}
 
-	if (mPtr->name == "AreaLightSource") {
-		return Colors::white.filter(mPtr->Ka[0], mPtr->Ka[1], mPtr->Ka[2]);
+	if (mPtr != nullptr && mPtr->name == "AreaLightSource") {
+		Color ans = Colors::white.filter(mPtr->Ka[0], mPtr->Ka[1], mPtr->Ka[2]);
+		return ans;
 	}
 	// common reflection and refraction.
 	Vector3R pos = ray.source + distance * ray.direction;
@@ -90,7 +91,8 @@ Color MonteCarloRayTracer::rayTrace_Single(const Ray& ray, int _depth) {
 	}
 
 	if (mPtr->name == "AreaLightSource") {
-		return Colors::white.filter(mPtr->Ka);
+		Color ans = Colors::white.filter(mPtr->Ka);
+		return ans;
 	}
 	Vector3R pos = ray.source + distance * ray.direction;
 	Color ans;

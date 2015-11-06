@@ -2,8 +2,7 @@
 
 #pragma region BASE_INTERSECTION_TESTER
 
-void IntersectionTester::basicIntersectionTest(const Ray &ray, const F& face,
-	bool &intersected, Real &distance, Vector3R &normal, MaterialPtr &mPtr) {
+void IntersectionTester::basicIntersectionTest(const Ray &ray, const F& face) {
 
 	const Vector3R &p0 = scenePtr->vertices[face.v[0]].v, &p1 = scenePtr->vertices[face.v[1]].v, &p2 = scenePtr->vertices[face.v[2]].v;
 
@@ -26,23 +25,22 @@ void IntersectionTester::basicIntersectionTest(const Ray &ray, const F& face,
 		return;
 	}
 	Real t = Q.dot(E2) / det;
-	if (t < Limit::Epsilon || t > distance) {
+	if (t < Limit::Epsilon || t > cacheDistance) {
 		return;
 	}
 
-	intersected = true;
-	distance = t;
+	cacheIntersected = true;
+	cacheDistance = t;
 	Vector3R n =
 		scenePtr->normals[face.vn[0]].v * w + scenePtr->normals[face.vn[1]].v * u + scenePtr->normals[face.vn[2]].v * v;
-	normal = n.normalized();
+	cacheNormal = n.normalized();
+	cacheMPtr = face.materialPtr;
 	switch (face.materialPtr->textureMode)
 	{
 	case NO_TEXTURE:
-		mPtr = face.materialPtr;
 		return;
 	case BUMP: {
 		// compute normal shift
-		mPtr = face.materialPtr;
 		Vector3R &t0 = scenePtr->textures[face.vt[0]].v, &t1 = scenePtr->textures[face.vt[1]].v, &t2 = scenePtr->textures[face.vt[2]].v;
 		Vector3R T1 = t1 - t0, T2 = t2 - t0;
 		Real v11 = E1.squaredNorm(), v12 = E1.dot(E2), v22 = E2.squaredNorm();
@@ -55,18 +53,14 @@ void IntersectionTester::basicIntersectionTest(const Ray &ray, const F& face,
 		Vector3R shiftV = k21 * E1 + k22 * E2;
 
 		Vector3R textureCoordinate = t0 * w + t1 * u + t2 * v;
-		int tI = std::min((int)(textureCoordinate[0] * mPtr->texturePtr->W), mPtr->texturePtr->W - 2);
-		int tJ = std::min((int)(textureCoordinate[1] * mPtr->texturePtr->H), mPtr->texturePtr->H - 2);
-		Real shiftX = mPtr->texturePtr->bump[tI + 1][tJ] - mPtr->texturePtr->bump[tI][tJ];
-		Real shiftY = mPtr->texturePtr->bump[tI][tJ + 1] - mPtr->texturePtr->bump[tI][tJ];
-		normal = (normal + 10 * (shiftH * shiftX + shiftV * shiftY)).normalized();
+		int tI = std::min((int)(textureCoordinate[0] * cacheMPtr->texturePtr->W), cacheMPtr->texturePtr->W - 2);
+		int tJ = std::min((int)(textureCoordinate[1] * cacheMPtr->texturePtr->H), cacheMPtr->texturePtr->H - 2);
+		Real shiftX = cacheMPtr->texturePtr->bump[tI + 1][tJ] - cacheMPtr->texturePtr->bump[tI][tJ];
+		Real shiftY = cacheMPtr->texturePtr->bump[tI][tJ + 1] - cacheMPtr->texturePtr->bump[tI][tJ];
+		cacheNormal = (cacheNormal + 10 * (shiftH * shiftX + shiftV * shiftY)).normalized();
 	}
 		return;
 	case TEXTURE: {
-		if (mPtr != nullptr && mPtr->textureMode == TEXTURE) {
-			delete mPtr;
-		}
-		mPtr = new Material(*face.materialPtr);
 		Vector3R &t0 = scenePtr->textures[face.vt[0]].v, &t1 = scenePtr->textures[face.vt[1]].v, &t2 = scenePtr->textures[face.vt[2]].v;
 		Vector3R T1 = t1 - t0, T2 = t2 - t0;
 		Real v11 = E1.squaredNorm(), v12 = E1.dot(E2), v22 = E2.squaredNorm();
@@ -79,11 +73,11 @@ void IntersectionTester::basicIntersectionTest(const Ray &ray, const F& face,
 		Vector3R shiftV = k21 * E1 + k22 * E2;
 
 		Vector3R textureCoordinate = t0 * w + t1 * u + t2 * v;
-		int tI = std::min((int)(textureCoordinate[0] * mPtr->texturePtr->W), mPtr->texturePtr->W - 2);
-		int tJ = std::min((int)(textureCoordinate[1] * mPtr->texturePtr->H), mPtr->texturePtr->H - 2);
-		mPtr->Kd[0] *= mPtr->texturePtr->texture[tI][tJ][0];
-		mPtr->Kd[1] *= mPtr->texturePtr->texture[tI][tJ][1];
-		mPtr->Kd[2] *= mPtr->texturePtr->texture[tI][tJ][2];
+		int tI = std::min((int)(textureCoordinate[0] * cacheMPtr->texturePtr->W), cacheMPtr->texturePtr->W - 2);
+		int tJ = std::min((int)(textureCoordinate[1] * cacheMPtr->texturePtr->H), cacheMPtr->texturePtr->H - 2);
+		textureFilterR = cacheMPtr->texturePtr->texture[tI][tJ][0];
+		textureFilterG = cacheMPtr->texturePtr->texture[tI][tJ][1];
+		textureFilterB = cacheMPtr->texturePtr->texture[tI][tJ][2];
 		return;
 	}
 	case BRDF_DEFINED:
@@ -94,8 +88,7 @@ void IntersectionTester::basicIntersectionTest(const Ray &ray, const F& face,
 	}
 }
 
-void IntersectionTester::basicIntersectionTest(const Ray &ray, const Sphere& sphere,
-	bool &intersected, Real &distance, Vector3R &normal, MaterialPtr& mPtr) {
+void IntersectionTester::basicIntersectionTest(const Ray &ray, const Sphere& sphere) {
 	
 	Real B = 2 * (ray.direction.dot(ray.source - sphere.center));
 	Real C = (ray.source - sphere.center).squaredNorm() - sphere.r * sphere.r;
@@ -104,20 +97,20 @@ void IntersectionTester::basicIntersectionTest(const Ray &ray, const Sphere& sph
 		return;
 	}
 	Real t1 = (-B - sqrt(delta)) / 2;
-	if (t1 > distance) {
+	if (t1 > cacheDistance) {
 		return;
 	}
 	if (t1 < Limit::Epsilon) {
 		t1 = (-B + sqrt(delta)) / 2;
-		if (t1 < Limit::Epsilon || t1 > distance) {
+		if (t1 < Limit::Epsilon || t1 > cacheDistance) {
 			return;
 		}
 	}
 
-	intersected = true;
-	distance = t1;
-	normal = (ray.source + distance * ray.direction - sphere.center).normalized();
-	mPtr = sphere.materialPtr;
+	cacheIntersected = true;
+	cacheDistance = t1;
+	cacheNormal = (ray.source + cacheDistance * ray.direction - sphere.center).normalized();
+	cacheMPtr = sphere.materialPtr;
 }
 
 #pragma endregion
@@ -125,16 +118,31 @@ void IntersectionTester::basicIntersectionTest(const Ray &ray, const Sphere& sph
 #pragma region SIMPLE_TESTER
 
 void SimpleIntersectionTester::intersectionTest(const Ray &ray, bool &intersected, Real &distance, Vector3R &normal, MaterialPtr &mPtr) {
-	distance = Limit::Infinity;
-	intersected = false;
+	cacheDistance = Limit::Infinity;
+	cacheIntersected = false;
+	cacheNormal = Vector3R(1, 0, 0);
+	cacheMPtr = nullptr;
 	
 	int n = scenePtr->faces.size();
 	for (int i = 0; i < n; i++) {
-		basicIntersectionTest(ray, scenePtr->faces[i], intersected, distance, normal, mPtr);
+		basicIntersectionTest(ray, scenePtr->faces[i]);
 	}
 	n = scenePtr->spheres.size();
 	for (int i = 0; i < n; i++) {
-		basicIntersectionTest(ray, scenePtr->spheres[i], intersected, distance, normal, mPtr);
+		basicIntersectionTest(ray, scenePtr->spheres[i]);
+	}
+	intersected = cacheIntersected;
+	distance = cacheDistance;
+	normal = cacheNormal;
+	mPtr = cacheMPtr;
+	if (cacheMPtr != nullptr) {
+		// memory leak fixed
+		if (mPtr->textureMode == TEXTURE) {
+			mPtr = new Material(*cacheMPtr);
+			mPtr->Kd[0] *= textureFilterR;
+			mPtr->Kd[1] *= textureFilterG;
+			mPtr->Kd[2] *= textureFilterB;
+		}
 	}
 }
 

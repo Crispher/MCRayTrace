@@ -20,6 +20,7 @@
 #include "Eigen/StdVector"
 
 //#define USE_FLOAT
+//#define NDEBUG
 
 #ifdef USE_FLOAT
 typedef float Real;
