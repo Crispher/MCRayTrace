@@ -18,6 +18,7 @@ public:
 
 	void basicIntersectionTest(const Ray &ray, const F&);
 	void basicIntersectionTest(const Ray &ray, const Sphere&);
+	bool visible(const Vector3R &pos1, const Vector3R &pos2);
 
 	virtual void intersectionTest(const Ray&, bool &intersected, Real &distance, Vector3R &normal, MaterialPtr &mPtr) = 0;
 

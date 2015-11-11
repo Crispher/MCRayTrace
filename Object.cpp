@@ -51,9 +51,9 @@ void Texture::loadTexture(const char* filename) {
 	for (int _w = 0; _w < W; _w++) {
 		for (int _h = 0; _h < H; _h++) {
 			cv::Vec3b t = image.at<cv::Vec3b>(H - _h - 1, _w);
-			texture[_w][_h][0] = t[2] / 255.0;
-			texture[_w][_h][1] = t[1] / 255.0;
-			texture[_w][_h][2] = t[2] / 255.0;
+			texture[_w][_h][0] = t[2] / (Real)255.0;
+			texture[_w][_h][1] = t[1] / (Real)255.0;
+			texture[_w][_h][2] = t[0] / (Real)255.0;
 		}
 	}
 }
@@ -122,6 +122,10 @@ void Object::load(const char* filename) {
 			}
 		}
 	}
+	// to do;
+	if (normals.empty()) {
+		computeNormals(false);
+	}
 }
 
 Material::Material(const Material& m) {
@@ -129,12 +133,10 @@ Material::Material(const Material& m) {
 	Td = m.Td; Ts = m.Ts; 
 	name = m.name;
 	Ns = m.Ns;
-	Tr = m.Tr;
 	Nst = m.Nst;
 	n = m.n;
-	textureMode = m.textureMode;
+	flag = m.flag;
 	texturePtr = m.texturePtr;
-	BRDFPtr = m.BRDFPtr;
 }
 
 void Object::loadMtl(const char* filename) {
@@ -162,7 +164,8 @@ void Object::loadMtl(const char* filename) {
 			x = boost::lexical_cast<Real>(argv[1]);
 			y = boost::lexical_cast<Real>(argv[2]);
 			z = boost::lexical_cast<Real>(argv[3]);
-			mPtr->Ka = vector < Real > {x, y, z};
+			Real e = (x + y + z) / 3;
+			mPtr->Ka = vector < Real > {x, y, z, e};
 			continue;
 		}
 		if (argv[0] == "Kd" && toggle) {
@@ -172,6 +175,9 @@ void Object::loadMtl(const char* filename) {
 			z = boost::lexical_cast<Real>(argv[3]);
 			Real e = (x + y + z) / 3;
 			mPtr->Kd = vector < Real > {x, y, z, e};
+			if (e > Limit::Epsilon) {
+				mPtr->setRd();
+			}
 			continue;
 		}
 		if (argv[0] == "Ks" && toggle) {
@@ -181,14 +187,20 @@ void Object::loadMtl(const char* filename) {
 			z = boost::lexical_cast<Real>(argv[3]);
 			Real e = (x + y + z) / 3;
 			mPtr->Ks = vector < Real > {x, y, z, e};
+			if (e > Limit::Epsilon) {
+				mPtr->setRs();
+			}
 			continue;
 		}
 		if (argv[0] == "Ns" && toggle) {
-			mPtr->Ns = boost::lexical_cast<Real>(argv[1]);
+			mPtr->Ns = boost::lexical_cast<int>(argv[1]);
 			continue;
 		}
 		if (argv[0] == "Tr" && toggle) {
-			mPtr->Tr = boost::lexical_cast<Real>(argv[1]);
+			Real Tr = boost::lexical_cast<Real>(argv[1]);
+			if (Tr > 0) {
+				mPtr->setTr();
+			}
 			continue;
 		}
 		if (argv[0] == "Td" && toggle) {
@@ -198,6 +210,9 @@ void Object::loadMtl(const char* filename) {
 			z = boost::lexical_cast<Real>(argv[3]);
 			Real e = (x + y + z) / 3;
 			mPtr->Td = vector < Real > {x, y, z, e};
+			if (e > Limit::Epsilon) {
+				mPtr->setTd();
+			}
 			continue;
 		}
 		if (argv[0] == "Ts" && toggle) {
@@ -207,10 +222,13 @@ void Object::loadMtl(const char* filename) {
 			z = boost::lexical_cast<Real>(argv[3]);
 			Real e = (x + y + z) / 3;
 			mPtr->Ts = vector < Real > {x, y, z, e};
+			if (e > Limit::Epsilon) {
+				mPtr->setTs();
+			}
 			continue;
 		}
 		if (argv[0] == "Nst" && toggle) {
-			mPtr->Nst = boost::lexical_cast<Real>(argv[1]);
+			mPtr->Nst = boost::lexical_cast<int>(argv[1]);
 			continue;
 		}
 		if (argv[0] == "n" && toggle) {
@@ -218,38 +236,20 @@ void Object::loadMtl(const char* filename) {
 			continue;
 		}
 		if (argv[0] == "bump" && toggle) {
-			mPtr->textureMode = BUMP;
 			mPtr->texturePtr = new Texture();
 			mPtr->texturePtr->loadBump(argv[1].c_str());
+			mPtr->setBump();
 			continue;
 		}
 		if (argv[0] == "texture" && toggle) {
-			mPtr->textureMode = TEXTURE;
 			mPtr->texturePtr = new Texture();
 			mPtr->texturePtr->loadTexture(argv[1].c_str());
+			mPtr->setTexture();
+			mPtr->setTextureKd();
 			continue;
 		}
 		if (argv[0] == "BRDF" && toggle) {
-			mPtr->textureMode = BRDF_DEFINED;
-			Real
-				r1 = boost::lexical_cast<Real>(argv[1]),
-				r2 = boost::lexical_cast<Real>(argv[2]),
-				r3 = boost::lexical_cast<Real>(argv[3]),
-				r4 = boost::lexical_cast<Real>(argv[4]),
-				r5 = boost::lexical_cast<Real>(argv[5]),
-				r6 = boost::lexical_cast<Real>(argv[6]),
-				r7 = boost::lexical_cast<Real>(argv[7]),
-				r8 = boost::lexical_cast<Real>(argv[8]),
-				r9 = boost::lexical_cast<Real>(argv[9]),
-				r10 = boost::lexical_cast<Real>(argv[10]),
-				r11 = boost::lexical_cast<Real>(argv[11]),
-				r12 = boost::lexical_cast<Real>(argv[12]);
-			std::vector < Real >
-				kdr{ r1, r2, r3 },
-				ksr{ r4, r5, r6 },
-				kdp{ r7, r8, r9 },
-				ksp{ r10, r11, r12 };
-			mPtr->BRDFPtr = new Ward(kdr, ksr, kdp, ksp);
+			// todo;
 			continue;
 		}
 	}
@@ -309,14 +309,42 @@ void Object::rotate(int axis, Real angle) {
 		iter->v[axis2] = s*v1 + c*v2;
 	}
 }
-
-void Object::transform(const Matrix3R& m) {
-	for (auto iter = vertices.begin(); iter != vertices.end(); iter++) {
-		// todo
+// compute for faces if !interpolation.
+void Object::computeNormals(bool interpolation) {
+	int offset = normals.size();
+	if (!interpolation) {
+		int n = faces.size();
+		for (int i = 0; i < n; ++i) {
+			Vector3R E1 = vertices[faces[i].v[1]].v - vertices[faces[i].v[0]].v;
+			Vector3R E2 = vertices[faces[i].v[2]].v - vertices[faces[i].v[0]].v;
+			normals.push_back(VN(E1.cross(E2)));
+			faces[i].vn = std::vector<int>(3, offset);
+			if (faces[i].vt.empty()) {
+				faces[i].vt = std::vector<int>(3, 0);
+			}
+			++offset;
+		}
 	}
-	for (auto iter = normals.begin(); iter != normals.end(); iter++) {
-		// todo
+	int n = normals.size();
+	for (int i = 0; i < n; ++i) {
+		normals[i].v.normalize();
 	}
+	std::ofstream os("normals.n");
+	for (int i = 0; i < vertices.size(); ++i) {
+		os << "v " << vertices[i].v[0] << ' ' << vertices[i].v[1] << ' ' << vertices[i].v[2] << '\n';
+	}
+	for (int i = 0; i < textures.size(); ++i) {
+		os << "vt " << textures[i].v[0] << ' ' << textures[i].v[1] << ' ' << textures[i].v[2] << '\n';
+	}
+	for (int i = 0; i < normals.size(); ++i) {
+		os << "vn " << normals[i].v[0] << ' ' << normals[i].v[1] << ' ' << normals[i].v[2] << '\n';
+	}
+	for (int i = 0; i < faces.size(); ++i) {
+		os << "f " << faces[i].v[0] << '/' << faces[i].vt[0] << '/' << faces[i].vn[0] << ' '
+			<< faces[i].v[1] << '/' << faces[i].vt[1] << '/' << faces[i].vn[1] << ' '
+			<< faces[i].v[2] << '/' << faces[i].vt[2] << '/' << faces[i].vn[2] << '\n';
+	}
+	os.close();
 }
 
 #pragma endregion

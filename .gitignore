@@ -1,12 +1,13 @@
-.o
+*.o
 
-.i
+*.i
 
-.exe
+*.exe
 
-.obj
+*.obj
 
-.log
+*.log
 
-.pdb
+*.pdb
 
+*.tlog

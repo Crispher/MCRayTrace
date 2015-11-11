@@ -43,10 +43,12 @@ public:
 
 	// scene settings
 	Color ambientLight;
+	int numLightSources = 0;
+
 	//Camera camera;
 	std::vector<Object> objects;
 
-
+	std::vector<F, Eigen::aligned_allocator<Vector3R>> AreaLightSources;
 	std::vector<V, Eigen::aligned_allocator<Vector3R>> vertices;
 	std::vector<VN, Eigen::aligned_allocator<Vector3R>> normals;
 	std::vector<VT, Eigen::aligned_allocator<Vector3R>> textures;

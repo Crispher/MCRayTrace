@@ -1,42 +1,7 @@
-﻿Build started 11/6/2015 2:59:48 PM.
+﻿Build started 11/11/2015 10:30:02 PM.
      1>Project "C:\Users\Crispher Gu\Desktop\MCRayTrace\MCRayTrace\MCRayTrace.vcxproj" on node 2 (Build target(s)).
-     1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /I"C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\opencv\build\include" /I"C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\boost_1_59_0" /I"C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\eigen-eigen-bdd17ee3b1b3" /Zi /nologo /W3 /WX- /O2 /Oi /Ot /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Release\\" /Fd"x64\Release\vc120.pdb" /Gd /TP /errorReport:prompt BRDF.cpp IntersectionTester.cpp Object.cpp RayTracer.cpp Renderer.cpp Sampler.cpp Scene.cpp Screen.cpp main.cpp
-         BRDF.cpp
-         IntersectionTester.cpp
-     1>IntersectionTester.cpp(126): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-     1>IntersectionTester.cpp(130): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
-         Object.cpp
-         RayTracer.cpp
-     1>RayTracer.cpp(31): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-     1>RayTracer.cpp(39): warning C4244: 'argument' : conversion from 'Real' to 'int', possible loss of data
-     1>RayTracer.cpp(40): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
-     1>RayTracer.cpp(54): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-     1>RayTracer.cpp(63): warning C4244: 'argument' : conversion from 'Real' to 'int', possible loss of data
-     1>RayTracer.cpp(64): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
-     1>RayTracer.cpp(113): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-     1>RayTracer.cpp(125): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-     1>RayTracer.cpp(137): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-     1>RayTracer.cpp(149): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-         Renderer.cpp
-     1>Renderer.cpp(8): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-     1>Renderer.cpp(36): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-         Sampler.cpp
-     1>Sampler.cpp(46): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
-     1>Sampler.cpp(66): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
-     1>Sampler.cpp(90): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
-     1>Sampler.cpp(121): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
-     1>Sampler.cpp(216): warning C4244: 'argument' : conversion from 'Real' to 'int', possible loss of data
-     1>Sampler.cpp(234): warning C4244: 'argument' : conversion from 'Real' to 'int', possible loss of data
-     1>Sampler.cpp(246): warning C4244: 'argument' : conversion from 'Real' to 'int', possible loss of data
-     1>Sampler.cpp(263): warning C4244: 'argument' : conversion from 'Real' to 'int', possible loss of data
-         Scene.cpp
-         Screen.cpp
-     1>Screen.cpp(74): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-         main.cpp
-       Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Crispher Gu\Desktop\MCRayTrace\x64\Release\MCRayTrace.exe" /INCREMENTAL:NO /NOLOGO "C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\opencv\build\x64\vc12\lib\opencv_ts300.lib" "C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\opencv\build\x64\vc12\lib\opencv_world300.lib" kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Crispher Gu\Desktop\MCRayTrace\x64\Release\MCRayTrace.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Crispher Gu\Desktop\MCRayTrace\x64\Release\MCRayTrace.lib" /MACHINE:X64 x64\Release\BRDF.obj
-         x64\Release\IntersectionTester.obj
+     1>Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Crispher Gu\Desktop\MCRayTrace\x64\Release\MCRayTrace.exe" /INCREMENTAL:NO /NOLOGO "C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\opencv\build\x64\vc12\lib\opencv_ts300.lib" "C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\opencv\build\x64\vc12\lib\opencv_world300.lib" kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Crispher Gu\Desktop\MCRayTrace\x64\Release\MCRayTrace.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Crispher Gu\Desktop\MCRayTrace\x64\Release\MCRayTrace.lib" /MACHINE:X64 x64\Release\IntersectionTester.obj
          x64\Release\main.obj
          x64\Release\Object.obj
          x64\Release\RayTracer.obj
@@ -51,4 +16,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:36.85
+Time Elapsed 00:00:09.58

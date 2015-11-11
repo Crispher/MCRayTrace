@@ -12,7 +12,8 @@ Color MonteCarloRayTracer::rayTrace(const Ray& ray, int _depth) {
 	MaterialPtr mPtr = nullptr;
 	intersectionTesterPtr->intersectionTest(ray, intersected, distance, normal, mPtr);
 	if (!intersected) {
-		return Colors::black;
+		//return Colors::black;
+		return Colors::white.filter(0.5, 0.5, 0.5);
 	}
 
 	if (mPtr != nullptr && mPtr->name == "AreaLightSource") {
@@ -21,23 +22,24 @@ Color MonteCarloRayTracer::rayTrace(const Ray& ray, int _depth) {
 	}
 	// common reflection and refraction.
 	Vector3R pos = ray.source + distance * ray.direction;
-	Color ans;
+	Color ans = Colors::black;
 	
 	bool lookFromOutside = ray.direction.dot(normal) < 0;
 	if (lookFromOutside) {
 		std::vector<Sample, Eigen::aligned_allocator<Vector3R>> samples_diffuse, samples_specular;
 
-		samples_diffuse = samplerPtr->sample_Diffuse_P(normal, sampleSize);
-		int n = samples_diffuse.size();
-		for (int i = 0; i < n; i++) {
-			Ray _ray(pos, samples_diffuse[i].v);
-			samples_diffuse[i].radiance = rayTrace_Single(_ray, _depth - 1);
+		if (mPtr->isRd()) {
+			samples_diffuse = samplerPtr->sample_Diffuse_P(normal, sampleSize);
+			int n = samples_diffuse.size();
+			for (int i = 0; i < n; i++) {
+				Ray _ray(pos, samples_diffuse[i].v);
+				samples_diffuse[i].radiance = rayTrace_Single(_ray, _depth - 1);
+			}
+			ans += integrateDiffuse_Reflect(samples_diffuse, mPtr);
 		}
-		ans += integrateDiffuse_Reflect(samples_diffuse, mPtr);
-
-		if (mPtr->Ns > 0) {
+		if (mPtr->isRs()) {
 			samples_specular = samplerPtr->sample_Specular_P(reflect(ray.direction, normal), normal, mPtr->Ns, sampleSize);
-			n = samples_specular.size();
+			int n = samples_specular.size();
 			for (int i = 0; i < n; i++) {
 				Ray _ray(pos, samples_specular[i].v);
 				samples_specular[i].radiance = rayTrace_Single(_ray, _depth - 1);
@@ -46,22 +48,23 @@ Color MonteCarloRayTracer::rayTrace(const Ray& ray, int _depth) {
 		}
 	}
 
-	if (mPtr->Tr > 0) {
+	if (mPtr->isTr()) {
 		Real sign = lookFromOutside ? -1 : 1;
 		std::vector<Sample, Eigen::aligned_allocator<Vector3R>> samples_diffuse_r, samples_specular_r;
 
-		samples_diffuse_r = samplerPtr->sample_Diffuse_P(sign * normal, sampleSize);
-		int n = samples_diffuse_r.size();
-		for (int i = 0; i < n; i++) {
-			Ray _ray(pos, samples_diffuse_r[i].v);
-			samples_diffuse_r[i].radiance = rayTrace_Single(_ray, _depth - 1);
-				
+		if (mPtr->isTd()) {
+			samples_diffuse_r = samplerPtr->sample_Diffuse_P(sign * normal, sampleSize);
+			int n = samples_diffuse_r.size();
+			for (int i = 0; i < n; i++) {
+				Ray _ray(pos, samples_diffuse_r[i].v);
+				samples_diffuse_r[i].radiance = rayTrace_Single(_ray, _depth - 1);
+
+			}
+			ans += integrateDiffuse_Refract(samples_diffuse_r, mPtr);
 		}
-		ans += integrateDiffuse_Refract(samples_diffuse_r, mPtr);
-			
-		if (mPtr->Nst > 0) {
+		if (mPtr->isTs()) {
 			samples_specular_r = samplerPtr->sample_Specular_P(refract(ray.direction, normal, mPtr->n), sign * normal, mPtr->Nst, sampleSize);
-			n = samples_specular_r.size();
+			int n = samples_specular_r.size();
 			for (int i = 0; i < n; i++) {
 				Ray _ray(pos, samples_specular_r[i].v);
 				samples_specular_r[i].radiance = rayTrace_Single(_ray, _depth - 1);
@@ -69,7 +72,7 @@ Color MonteCarloRayTracer::rayTrace(const Ray& ray, int _depth) {
 			ans += integrateSpecular_Refract(samples_specular_r, mPtr);
 		}
 	}
-	if (mPtr->textureMode == TEXTURE) {
+	if (mPtr->isTextured()) {
 		delete mPtr;
 	}
 	return ans;
@@ -87,7 +90,8 @@ Color MonteCarloRayTracer::rayTrace_Single(const Ray& ray, int _depth) {
 	MaterialPtr mPtr = nullptr;
 	intersectionTesterPtr->intersectionTest(ray, intersected, distance, normal, mPtr);
 	if (!intersected) {
-		return Colors::black;
+		//return Colors::black;
+		return Colors::white.filter(0.2, 0.2, 0.2);
 	}
 
 	if (mPtr->name == "AreaLightSource") {
@@ -101,7 +105,7 @@ Color MonteCarloRayTracer::rayTrace_Single(const Ray& ray, int _depth) {
 	Ray _ray(pos, s.v);
 	s.radiance = rayTrace_Single(_ray, _depth - 1);
 	ans = integrate(s, mPtr);
-	if (mPtr->textureMode == TEXTURE) {
+	if (mPtr->isTextured()) {
 		delete mPtr;
 	}
 	return ans;

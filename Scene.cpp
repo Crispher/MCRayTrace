@@ -1,8 +1,6 @@
 #include "Scene.h"
 #include "stdafx.h"
 #include "Object.h"
-using namespace boost::numeric;
-//#define DEBUG_LOG
 #define SHOW_PROGRESS
 #pragma region CAMERA
 
@@ -18,6 +16,7 @@ Camera::Camera(Real px, Real py, Real pz,
 
 	direction = Vector3R();
 	direction[0] = dx; direction[1] = dy; direction[2] = dz;
+	direction.normalize();
 
 	up = Vector3R();
 	up[0] = ux; up[1] = uy; up[2] = uz;
@@ -28,13 +27,6 @@ Camera::Camera(Real px, Real py, Real pz,
 	focolength = foco;
 	width = w; height = h;
 	step = s;
-}
-
-Camera Camera::load(const char* filename) {
-	std::ifstream in = std::ifstream(filename);
-	Real x, y, z, dx, dy, dz, ux, uy, uz, foco, w, h, step;
-	in >> x >> y >> z >> dx >> dy >> dz >> ux >> uy >> uz >> foco >> w >> h >> step;
-	return Camera(x, y, z, dx, dy, dz, ux, uy, uz, foco, w, h, step);
 }
 
 void Camera::printInfo() {
@@ -50,12 +42,43 @@ void Camera::printInfo() {
 #pragma endregion
 
 void Scene::constructScene() {
-	vertices = std::vector<V, Eigen::aligned_allocator<Vector3R>>(objects[0].vertices);
-	normals = std::vector<VN, Eigen::aligned_allocator<Vector3R>>(objects[0].normals);
-	textures = std::vector<VT, Eigen::aligned_allocator<Vector3R>>(objects[0].textures);
-	faces = std::vector<F, Eigen::aligned_allocator<Vector3R>>(objects[0].faces);
-	spheres = std::vector<Sphere, Eigen::aligned_allocator<Vector3R>>(objects[0].spheres);
-	materials = std::map<std::string, MaterialPtr>(objects[0].materials);
+	printf("Constructing scene...\n");
+	std::vector<F> faces_temp_ls, faces_temp_nls;
+	
+	int n = objects.size();
+	int Voffset = 0, Noffset = 0, Toffset = 0;
+	for (int i = 0; i < n; i++) {
+		vertices.insert(vertices.end(), objects[i].vertices.begin(), objects[i].vertices.end());
+		normals.insert(normals.end(), objects[i].normals.begin(), objects[i].normals.end());
+		textures.insert(textures.end(), objects[i].textures.begin(), objects[i].textures.end());
+		spheres.insert(spheres.end(), objects[i].spheres.begin(), objects[i].spheres.end());
+		materials.insert(objects[i].materials.begin(), objects[i].materials.end());
+		for (int j = 0; j < objects[i].faces.size(); ++j) {
+			F temp = objects[i].faces[j];
+			for (int k = 0; k < temp.v.size(); ++k) {
+				temp.v[k] += Voffset;
+			}
+			for (int k = 0; k < temp.vn.size(); ++k) {
+				temp.vn[k] += Noffset;
+			}
+			for (int k = 0; k < temp.vt.size(); ++k) {
+				temp.vt[k] += Toffset;
+			}
+			if (objects[i].faces[j].materialPtr->name == "AreaLightSource") {
+				faces_temp_ls.push_back(objects[i].faces[j]);
+				++numLightSources;
+			}
+			else {
+				faces_temp_nls.push_back(objects[i].faces[j]);
+			}
+		}
+		Voffset = vertices.size();
+		Noffset = normals.size();
+		Toffset = textures.size();
+	}
+	faces.insert(faces.end(), faces_temp_ls.begin(), faces_temp_ls.end());
+	faces.insert(faces.end(), faces_temp_nls.begin(), faces_temp_nls.end());
+	printf("Scene construction complete.\n");
 }
 
 #pragma region SCENE_RENDER
@@ -64,23 +87,6 @@ void Scene::loadObject(const char* filename) {
 	Object object;
 	object.load(filename);
 	objects.push_back(object);
-}
-
-void Scene::loadSceneSettings(const char *filename) {
-	std::ifstream in = std::ifstream(filename);
-	std::string line;
-	while (std::getline(in, line)) {
-		std::vector<std::string> argv;
-		boost::split(argv, line, boost::is_any_of("\t "));
-		
-		if (argv[0] == "lightsource") {
-			// todo;
-		}
-		if (argv[0] == "object") {
-			loadObject(argv[1].c_str());
-		}
-	}
-	constructScene();
 }
 
 #pragma endregion

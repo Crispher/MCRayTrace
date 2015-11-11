@@ -17,6 +17,7 @@ public:
 	~RayTracer() {}
 
 	virtual Color rayTrace(const Ray&, int) = 0;
+	virtual Color rayTrace_Single(const Ray&, int) = 0;
 };
 
 
@@ -24,14 +25,14 @@ class MonteCarloRayTracer : public RayTracer{
 public:
 	MonteCarloRayTracer() {}
 	Color rayTrace(const Ray &ray, int _depth);
-
+	Color rayTrace_Single(const Ray&, int _depth);
 private:
 	Color integrateDiffuse_Reflect(const std::vector<Sample, Eigen::aligned_allocator<Vector3R>>&, const MaterialPtr &mPtr) const;
 	Color integrateSpecular_Reflect(const std::vector<Sample, Eigen::aligned_allocator<Vector3R>>&, const MaterialPtr &mPtr) const;
 	Color integrateDiffuse_Refract(const std::vector<Sample, Eigen::aligned_allocator<Vector3R>>&, const MaterialPtr &mPtr) const;
 	Color integrateSpecular_Refract(const std::vector<Sample, Eigen::aligned_allocator<Vector3R>>&, const MaterialPtr &mPtr) const;
 
-	Color rayTrace_Single(const Ray&, int _depth);
+	
 	Color RussianRoulette(const Ray&, Real factor);
 	Color integrate(const Sample &s, const MaterialPtr &mPtr);
 	inline Vector3R reflect(const Vector3R& in, const Vector3R& normal) {

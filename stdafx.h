@@ -19,8 +19,8 @@
 #include "Eigen/Dense"
 #include "Eigen/StdVector"
 
-//#define USE_FLOAT
-//#define NDEBUG
+#define USE_FLOAT
+#define NDEBUG
 
 #ifdef USE_FLOAT
 typedef float Real;
@@ -35,7 +35,7 @@ typedef Eigen::Matrix3d Matrix3R;
 namespace Limit {
 	const int Infinity = 65535;
 #ifdef USE_FLOAT
-	const Real Epsilon = 4e-6;
+	const Real Epsilon = 1e-6;
 #else
 	const Real Epsilon = 1e-7;
 #endif

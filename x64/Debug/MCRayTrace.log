@@ -1,36 +1,27 @@
-﻿Build started 11/6/2015 2:41:53 PM.
+﻿Build started 11/11/2015 9:44:19 PM.
      1>Project "C:\Users\Crispher Gu\Desktop\MCRayTrace\MCRayTrace\MCRayTrace.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /I"C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\opencv\build\include" /I"C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\boost_1_59_0" /I"C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\eigen-eigen-bdd17ee3b1b3" /Zi /nologo /W3 /WX- /Od /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Debug\\" /Fd"x64\Debug\vc120.pdb" /Gd /TP /errorReport:prompt IntersectionTester.cpp RayTracer.cpp Renderer.cpp Sampler.cpp main.cpp
-         RayTracer.cpp
-     1>RayTracer.cpp(31): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-     1>RayTracer.cpp(39): warning C4244: 'argument' : conversion from 'Real' to 'int', possible loss of data
-     1>RayTracer.cpp(40): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
-     1>RayTracer.cpp(54): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-     1>RayTracer.cpp(63): warning C4244: 'argument' : conversion from 'Real' to 'int', possible loss of data
-     1>RayTracer.cpp(64): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
-     1>RayTracer.cpp(113): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-     1>RayTracer.cpp(125): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-     1>RayTracer.cpp(137): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-     1>RayTracer.cpp(149): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-         IntersectionTester.cpp
-     1>IntersectionTester.cpp(126): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-     1>IntersectionTester.cpp(130): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
-         Generating Code...
-         Compiling...
-         main.cpp
-         Sampler.cpp
-     1>Sampler.cpp(46): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
-     1>Sampler.cpp(66): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
-     1>Sampler.cpp(90): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
-     1>Sampler.cpp(121): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
-     1>Sampler.cpp(216): warning C4244: 'argument' : conversion from 'Real' to 'int', possible loss of data
-     1>Sampler.cpp(234): warning C4244: 'argument' : conversion from 'Real' to 'int', possible loss of data
-     1>Sampler.cpp(246): warning C4244: 'argument' : conversion from 'Real' to 'int', possible loss of data
-     1>Sampler.cpp(263): warning C4244: 'argument' : conversion from 'Real' to 'int', possible loss of data
-         Renderer.cpp
-     1>Renderer.cpp(8): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-     1>Renderer.cpp(36): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /I"C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\opencv\build\include" /I"C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\boost_1_59_0" /I"C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\eigen-eigen-bdd17ee3b1b3" /Zi /nologo /W3 /WX- /Od /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Debug\\" /Fd"x64\Debug\vc120.pdb" /Gd /TP /errorReport:prompt Object.cpp
+         Object.cpp
+     1>c:\users\crispher gu\desktop\mcraytrace\mcraytrace\stdafx.h(38): warning C4305: 'initializing' : truncation from 'double' to 'const Real'
+     1>c:\users\crispher gu\desktop\mcraytrace\mcraytrace\stdafx.h(45): warning C4305: 'initializing' : truncation from 'double' to 'const Real'
+     1>c:\users\crispher gu\desktop\mcraytrace\mcraytrace\Screen.h(56): warning C4244: 'argument' : conversion from 'double' to 'Real', possible loss of data
+     1>c:\users\crispher gu\desktop\mcraytrace\mcraytrace\Object.h(110): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>c:\users\crispher gu\desktop\mcraytrace\mcraytrace\Object.h(111): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>c:\users\crispher gu\desktop\mcraytrace\mcraytrace\Object.h(112): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>c:\users\crispher gu\desktop\mcraytrace\mcraytrace\Object.h(113): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>c:\users\crispher gu\desktop\mcraytrace\mcraytrace\Object.h(114): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>c:\users\crispher gu\desktop\mcraytrace\mcraytrace\Object.h(115): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>c:\users\crispher gu\desktop\mcraytrace\mcraytrace\Object.h(116): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>c:\users\crispher gu\desktop\mcraytrace\mcraytrace\Object.h(117): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>c:\users\crispher gu\desktop\mcraytrace\mcraytrace\Object.h(118): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>c:\users\crispher gu\desktop\mcraytrace\mcraytrace\Object.h(119): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>c:\users\crispher gu\desktop\mcraytrace\mcraytrace\Object.h(120): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>c:\users\crispher gu\desktop\mcraytrace\mcraytrace\Object.h(121): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>c:\users\crispher gu\desktop\mcraytrace\mcraytrace\Object.h(122): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>Object.cpp(315): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+     1>Object.cpp(317): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+     1>Object.cpp(329): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
      1>C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\xutility(2132): warning C4996: 'std::_Copy_impl': Function call with parameters that may be unsafe - this call relies on the caller to check that the passed values are correct. To disable this warning, use -D_SCL_SECURE_NO_WARNINGS. See documentation on how to use Visual C++ 'Checked Iterators'
                  C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\xutility(2113) : see declaration of 'std::_Copy_impl'
                  C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\boost_1_59_0\boost/algorithm/string/detail/classification.hpp(102) : see reference to function template instantiation '_OutIt std::copy<const char*,char*>(_InIt,_InIt,_OutIt)' being compiled
@@ -49,12 +40,11 @@
                  [
                      RangeT=boost::iterator_range<const char *>
                  ]
-                 Renderer.cpp(189) : see reference to function template instantiation 'boost::algorithm::detail::is_any_ofF<char> boost::algorithm::is_any_of<const char[3]>(RangeT (&))' being compiled
+                 Object.cpp(7) : see reference to function template instantiation 'boost::algorithm::detail::is_any_ofF<char> boost::algorithm::is_any_of<const char[2]>(RangeT (&))' being compiled
                  with
                  [
-                     RangeT=const char [3]
+                     RangeT=const char [2]
                  ]
-         Generating Code...
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Crispher Gu\Desktop\MCRayTrace\x64\Debug\MCRayTrace.exe" /INCREMENTAL /NOLOGO "C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\opencv\build\x64\vc12\lib\opencv_ts300.lib" "C:\Users\Crispher Gu\SkyDrive\Code\External_libraries\opencv\build\x64\vc12\lib\opencv_world300.lib" kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Crispher Gu\Desktop\MCRayTrace\x64\Debug\MCRayTrace.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Crispher Gu\Desktop\MCRayTrace\x64\Debug\MCRayTrace.lib" /MACHINE:X64 x64\Debug\BRDF.obj
          x64\Debug\IntersectionTester.obj
@@ -70,4 +60,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:22.64
+Time Elapsed 00:00:04.73

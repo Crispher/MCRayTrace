@@ -1,4 +1,5 @@
 #include "Renderer.h"
+#include "stdafx.h"
 #define SHOW_PROGRESS
 
 #pragma region PIXEL_RENDERER
@@ -12,7 +13,7 @@ Color PixelRenderer::renderPixel(int x, int y) {
 			Real offsetJ = (samples2R[i].v + y) * cameraPtr->step - cameraPtr->height / 2;
 			pixel = cameraPtr->position + cameraPtr->direction * cameraPtr->focolength + cameraPtr->right * offsetI + cameraPtr->up * offsetJ;
 			Ray ray = Ray::fromPoints(cameraPtr->position, pixel);
-			samples2R[i].value = rayTracerPtr->rayTrace(ray, rayTracerPtr->depth);
+			samples2R[i].value = rayTracerPtr->rayTrace_Single(ray, rayTracerPtr->depth);
 		}
 	}
 	else {
@@ -23,7 +24,7 @@ Color PixelRenderer::renderPixel(int x, int y) {
 			Vector3R focoPoint = (pixel - cameraPtr->position) * (cameraPtr->focalPlane / cameraPtr->focolength) + cameraPtr->position;
 			Vector3R samplePixel = pixel + (samples2R[i].u - 0.5) * cameraPtr->aperture * cameraPtr->right + (samples2R[i].v - 0.5) * cameraPtr->up * cameraPtr->aperture;
 			Ray ray = Ray::fromPoints(samplePixel, focoPoint);
-			samples2R[i].value = rayTracerPtr->rayTrace(ray, rayTracerPtr->depth);
+			samples2R[i].value = rayTracerPtr->rayTrace_Single(ray, rayTracerPtr->depth);
 		}
 	}
 	return reconstruct(samples2R);
@@ -37,9 +38,9 @@ Color PixelRenderer::reconstruct(const std::vector<Sample2R>& samples2R) {
 	for (int i = 0; i < n; i++) {
 		Real weight = exp(-((samples2R[i].u - 0.5) * (samples2R[i].u - 0.5) + (samples2R[i].v - 0.5) * (samples2R[i].v - 0.5)));
 		weightSum += weight;
-		r += samples2R[i].value.red() * weight;
-		g += samples2R[i].value.green() * weight;
-		b += samples2R[i].value.blue() * weight;
+		r += std::max((Real)0, samples2R[i].value.red() * weight);
+		g += std::max((Real)0, samples2R[i].value.green() * weight);
+		b += std::max((Real)0, samples2R[i].value.blue() * weight);
 	}
 	return Color(r / weightSum, g / weightSum, b / weightSum);
 }
@@ -147,8 +148,8 @@ void ImageRenderer::renderImageThreading(ThreadingTask &task) {
 		exit(-1);
 	}
 
-	mcrt.samplerPtr->generatePreSample_Specular(1, 777793, 1000);
-	mcrt.samplerPtr->generatePreSample_Diffuse(1, 777379);
+	mcrt.samplerPtr->generatePreSample_Specular(renderSetting->BRDF_sampleSize, 7793, 1000);
+	mcrt.samplerPtr->generatePreSample_Diffuse(renderSetting->BRDF_sampleSize, 7379);
 	mcrt.samplerPtr->generatePreSample_Diffuse_Single(737797);
 	mcrt.samplerPtr->generatePreSample_Specular_Single(717977, 1000);
 
@@ -184,13 +185,12 @@ ThreadingTask::ThreadingTask(int _start, int _end, int _h) : start(_start), end(
 RenderSetting::RenderSetting(const char *filename) {
 	std::ifstream in = std::ifstream(filename);
 	std::string line;
+	scenePtr = new Scene;
 	while (std::getline(in, line)) {
 		std::vector<std::string> argv;
 		boost::split(argv, line, boost::is_any_of("\t "));
-		if (argv[0] == "scene") {
-			scenePtr = new Scene;
-			scenePtr->loadSceneSettings(argv[1].c_str());
-			continue;
+		if (argv[0] == "object") {
+			scenePtr->loadObject(argv[1].c_str());
 		}
 		if (argv[0] == "camera") {
 			Real
@@ -261,4 +261,5 @@ RenderSetting::RenderSetting(const char *filename) {
 			continue;
 		}
 	}
+	scenePtr->constructScene();
 }
