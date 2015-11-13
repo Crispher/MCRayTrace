@@ -201,6 +201,23 @@ RenderSetting::RenderSetting(const char *filename) {
 		boost::split(argv, line, boost::is_any_of("\t "));
 		if (argv[0] == "object") {
 			scenePtr->loadObject(argv[1].c_str());
+			
+		}
+		if (argv[0] == "relocate") {
+			Real
+				x = boost::lexical_cast<Real>(argv[1]),
+				y = boost::lexical_cast<Real>(argv[2]),
+				z = boost::lexical_cast<Real>(argv[3]);
+			(scenePtr->objects.end() - 1)->relocate(x, y, z);
+		}
+		if (argv[0] == "scale") {
+			Real ratio = boost::lexical_cast<Real>(argv[1]);
+			(scenePtr->objects.end() - 1)->scale(ratio);
+		}
+		if (argv[0] == "rotate") {
+			int axis = boost::lexical_cast<int>(argv[1]);
+			Real angle = boost::lexical_cast<Real>(argv[2]);
+			(scenePtr->objects.end() - 1)->rotate(axis, Constants::Pi * angle);
 		}
 		if (argv[0] == "camera") {
 			Real

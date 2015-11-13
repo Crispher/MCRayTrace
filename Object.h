@@ -138,7 +138,9 @@ public:
 	// geometry transformations:
 	void translate(const Vector3R& v);
 	void rotate(int axis, Real angle);
+	void relocate(Real minx, Real minY, Real minz);
 	void computeNormals(bool interpolation);
+	void scale(Real ratio);
 
 	// material information:
 	std::vector<V, Eigen::aligned_allocator<Vector3R>> vertices;

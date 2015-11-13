@@ -249,7 +249,20 @@ void Object::loadMtl(const char* filename) {
 			mPtr->texturePtr = new Texture();
 			mPtr->texturePtr->loadTexture(argv[1].c_str());
 			mPtr->setTexture();
-			mPtr->setTextureKd();
+			for (int i = 2; i < argv.size(); ++i) {
+				if (argv[i] == "Kd") {
+					mPtr->setTextureKd();
+				}
+				if (argv[i] == "Ks") {
+					mPtr->setTextureKs();
+				}
+				if (argv[i] == "Td") {
+					mPtr->setTextureTd();
+				}
+				if (argv[i] == "Ts") {
+					mPtr->setTextureTs();
+				}
+			}
 			continue;
 		}
 		if (argv[0] == "BRDF" && toggle) {
@@ -289,6 +302,7 @@ void Object::translate(const Vector3R& v) {
 }
 
 void Object::rotate(int axis, Real angle) {
+	printf("Rotating...\n");
 	int axis1, axis2;
 	Real c = cos(angle), s = sin(angle), _s = -s;
 	switch (axis) {
@@ -302,16 +316,17 @@ void Object::rotate(int axis, Real angle) {
 		axis1 = 0; axis2 = 1;
 		break;
 	}
-	for (auto iter = vertices.begin(); iter != vertices.end(); iter++) {
-		Real v1 = iter->v[axis1], v2 = iter->v[axis2];
-		iter->v[axis1] = c*v1 + _s*v2;
-		iter->v[axis2] = s*v1 + c*v2;
+	for (int i = 0; i < vertices.size(); i++) {
+		Real v1 = vertices[i].v[axis1], v2 = vertices[i].v[axis2];
+		vertices[i].v[axis1] = c*v1 + _s*v2;
+		vertices[i].v[axis2] = s*v1 + c*v2;
 	}
-	for (auto iter = normals.begin(); iter != normals.end(); iter++) {
-		Real v1 = iter->v[axis1], v2 = iter->v[axis2];
-		iter->v[axis1] = c*v1 + _s*v2;
-		iter->v[axis2] = s*v1 + c*v2;
+	for (int i = 0; i < normals.size(); i++) {
+		Real v1 = normals[i].v[axis1], v2 = normals[i].v[axis2];
+		normals[i].v[axis1] = c*v1 + _s*v2;
+		normals[i].v[axis2] = s*v1 + c*v2;
 	}
+	printf("Rotation complete\n");
 }
 // compute for faces if !interpolation.
 void Object::computeNormals(bool interpolation) {
@@ -349,6 +364,28 @@ void Object::computeNormals(bool interpolation) {
 			<< faces[i].v[2] << '/' << faces[i].vt[2] << '/' << faces[i].vn[2] << '\n';
 	}
 	os.close();
+}
+
+void Object::relocate(Real minx, Real miny, Real minz) {
+	printf("Relocating...\n");
+	Real mx = Limit::Infinity, my = Limit::Infinity, mz = Limit::Infinity;
+	for (int i = 0; i < vertices.size(); ++i) {
+		mx = std::min(vertices[i].v[0], mx);
+		my = std::min(vertices[i].v[1], my);
+		mz = std::min(vertices[i].v[2], mz);
+	}
+	Real dx = minx - mx, dy = miny - my, dz = minz - mz;
+	for (int i = 0; i < vertices.size(); ++i) {
+		vertices[i].v[0] += dx;
+		vertices[i].v[1] += dy;
+		vertices[i].v[2] += dz;
+	}
+	printf("Relocation complete.\n");
+}
+void Object::scale(Real ratio) {
+	for (int i = 0; i < vertices.size(); ++i) {
+		vertices[i].v *= ratio;
+	}
 }
 
 #pragma endregion
