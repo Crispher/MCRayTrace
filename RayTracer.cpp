@@ -16,7 +16,7 @@ Color MonteCarloRayTracer::rayTrace(const Ray& ray, int _depth) {
 		return Colors::white.filter(0.5, 0.5, 0.5);
 	}
 
-	if (mPtr != nullptr && mPtr->name == "AreaLightSource") {
+	if (mPtr != nullptr && mPtr->isLightSource()) {
 		Color ans = Colors::white.filter(mPtr->Ka[0], mPtr->Ka[1], mPtr->Ka[2]);
 		return ans;
 	}
@@ -90,11 +90,11 @@ Color MonteCarloRayTracer::rayTrace_Single(const Ray& ray, int _depth) {
 	MaterialPtr mPtr = nullptr;
 	intersectionTesterPtr->intersectionTest(ray, intersected, distance, normal, mPtr);
 	if (!intersected) {
-		//return Colors::black;
-		return Colors::white.filter(0.2, 0.2, 0.2);
+		return Colors::black;
+		// return Colors::white.filter(0.2, 0.2, 0.2);
 	}
 
-	if (mPtr->name == "AreaLightSource") {
+	if (mPtr->isLightSource()) {
 		Color ans = Colors::white.filter(mPtr->Ka);
 		return ans;
 	}

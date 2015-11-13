@@ -2,22 +2,11 @@
 #include "stdafx.h"
 #include "Object.h"
 #include "Scene.h"
+#include "IntersectionTester.h"
 class Ray;
 class Material;
 class Scene;
 
-class SimpleIntersectionTester : public IntersectionTester{
-public:
-	Scene* scenePtr;
-	SimpleIntersectionTester(Scene* _scenePtr) : scenePtr(_scenePtr) {}
-	void intersectionTest(const Ray&,
-		bool& out_intersected, Real& out_distance, Vector3R& out_normal,
-		bool& out_reflected, Ray& out_reflectingRay,
-		bool& out_refracted, Ray& out_refractingRay, Material& material
-		);
-	void intersectionTest_NoAdditionals(const Ray& ray,
-		bool& out_intersected, Real& out_distance);
-};
 
 class BBox {
 public:
@@ -37,7 +26,7 @@ public:
 	int splitAxis = -1;
 	Real splitAt;
 	BBox boundingBox;
-	const static int maxShapeCount = 10;
+	const static int maxShapeCount = 5;
 	KdtreeNode *lChild = nullptr, *rChild = nullptr;
 	std::vector<int> facesInside;
 
@@ -48,31 +37,23 @@ public:
 
 class Kdtree : public IntersectionTester {
 public:
-	Scene* scenePtr;
 	KdtreeNode *root;
-	int maxDepth = 3;
-	int maxShapeNumber = 10;
-
-	Kdtree();
+	int maxDepth = 27;
+	//int maxShapeNumber = 10;
+	int debug_testcount;
+	Kdtree() {};
 	Kdtree(Scene* _scenePtr);
-	~Kdtree();
-	void intersectionTest(const Ray& ray,
-		bool& out_intersected, Real& out_distance, Vector3R& out_normal,
-		bool& out_reflected, Ray& out_reflectingRay,
-		bool& out_refracted, Ray& out_refractingRay, Material& material);
-	void intersectionTest_NoAdditionals(const Ray&, bool&, Real&);
-	bool intersectionTest(KdtreeNode *cursor, const Ray& ray,
-		bool& out_intersected, Real& out_distance, Vector3R& out_normal,
-		bool& out_reflected, Ray& out_reflectingRay,
-		bool& out_refracted, Ray& out_refractingRay, Material& material);
+	~Kdtree() {};
+	void intersectionTest(const Ray& ray, bool &intersected, Real &distance, Vector3R &normal, MaterialPtr &mPtr);
+	bool intersectionTest(KdtreeNode *cursor, const Ray& ray);
 
 	void test(KdtreeNode *cursor);
 };
 
 #pragma region UTILITY
-
+// [x1, x2] \cap [x3, x4]
 inline bool segmentOverlap(Real x1, Real x2, Real x3, Real x4) {
-	return (x1 < x3 && x3 < x2) || (x3 < x1 && x1 < x4);
+	return (x1 < x4) && (x2 > x3);
 }
 
 inline Real max(Real x, Real y, Real z) {

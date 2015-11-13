@@ -131,7 +131,7 @@ void Object::load(const char* filename) {
 Material::Material(const Material& m) {
 	Ka = m.Ka; Kd = m.Kd; Ks = m.Ks;
 	Td = m.Td; Ts = m.Ts; 
-	name = m.name;
+	//name = m.name;
 	Ns = m.Ns;
 	Nst = m.Nst;
 	n = m.n;
@@ -144,6 +144,7 @@ void Object::loadMtl(const char* filename) {
 	std::string line;
 	bool toggle = false;
 	MaterialPtr mPtr = new Material;
+	std::string lastMtlName;
 	while (std::getline(in, line)) {
 		if (line[0] == '#') {
 			continue;
@@ -152,11 +153,14 @@ void Object::loadMtl(const char* filename) {
 		boost::split(argv, line, boost::is_any_of("\t "));
 		if (argv[0] == "newmtl") {
 			if (toggle) {
-				materials.insert(std::pair<std::string, MaterialPtr>(mPtr->name, mPtr));
+				materials.insert(std::pair<std::string, MaterialPtr>(lastMtlName, mPtr));
 				mPtr = new Material;
 			}
 			toggle = true;
-			mPtr->name = argv[1];
+			lastMtlName = argv[1];
+			if (argv[1] == "AreaLightSource") {
+				mPtr->setLightsource();
+			}
 			continue;
 		}
 		if (argv[0] == "Ka" && toggle) {
@@ -254,7 +258,7 @@ void Object::loadMtl(const char* filename) {
 		}
 	}
 	if (toggle) {
-		materials.insert(std::pair<std::string, MaterialPtr>(mPtr->name, mPtr));
+		materials.insert(std::pair<std::string, MaterialPtr>(lastMtlName, mPtr));
 	}
 }
 
@@ -263,8 +267,8 @@ void Object::printInfo() {
 		std::cout << "v_" << i << ": " << vertices[i].v << "\n";
 	}
 	for (int i = 0; i < faces.size(); i++) {
-		std::cout << "f_" << i << ": " << faces[i].v[0] << "/ " << faces[i].v[1] << "/ " << faces[i].v[2] <<
-			"; Material: " << faces[i].materialPtr->name << "\n";
+		/*std::cout << "f_" << i << ": " << faces[i].v[0] << "/ " << faces[i].v[1] << "/ " << faces[i].v[2] <<
+			"; Material: " << faces[i].materialPtr->name << "\n";*/
 	}
 	for (auto i : materials) {
 		std::cout << "mtl_" << i.first << ":\n" <<

@@ -22,6 +22,7 @@ public:
 
 	virtual void intersectionTest(const Ray&, bool &intersected, Real &distance, Vector3R &normal, MaterialPtr &mPtr) = 0;
 
+	void clearCache();
 	static inline Vector3R reflect(const Vector3R& in, const Vector3R& normal) {
 		return in - 2 * in.dot(normal) * normal;
 	}

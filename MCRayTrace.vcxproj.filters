@@ -39,6 +39,9 @@
     <ClInclude Include="Renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Kdtree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Object.cpp">
@@ -63,6 +66,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Kdtree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

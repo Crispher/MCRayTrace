@@ -1,37 +1,5 @@
 #include "Kdtree.h"
 
-#pragma region SIMPLE_INTERSECTION_TESTER
-
-void SimpleIntersectionTester::intersectionTest(const Ray& ray,
-	bool& out_intersected, Real& out_distance, Vector3R& out_normal,
-	bool& out_reflected, Ray& out_reflectingRay,
-	bool& out_refracted, Ray& out_refractingRay, Material& material) {
-	out_intersected = false;
-	int n = scenePtr->faces.size();
-	for (int i = 0; i < n; i++) {
-		scenePtr->basicIntersectionTest(ray, scenePtr->faces[i], out_intersected, out_distance, out_normal,
-			out_reflected, out_reflectingRay, out_refracted, out_refractingRay, material);
-	}
-	n = scenePtr->spheres.size();
-	for (int i = 0; i < n; i++) {
-		scenePtr->basicIntersectionTest(ray, scenePtr->spheres[i], out_intersected, out_distance, out_normal,
-			out_reflected, out_reflectingRay, out_refracted, out_refractingRay, material);
-	}
-}
-
-void SimpleIntersectionTester::intersectionTest_NoAdditionals(const Ray& ray, bool& out_intersected, Real& out_distance) {
-	out_intersected = false;
-	int n = scenePtr->faces.size();
-	for (int i = 0; i < n; i++) {
-		scenePtr->basicIntersectionTest_NoAdditionals(ray, scenePtr->faces[i], out_intersected, out_distance);
-	}
-	n = scenePtr->spheres.size();
-	for (int i = 0; i < n; i++) {
-		scenePtr->basicIntersectionTest_NoAdditionals(ray, scenePtr->spheres[i], out_intersected, out_distance);
-	}
-}
-
-#pragma endregion
 
 #pragma region BBOX
 
@@ -39,9 +7,13 @@ BBox::BBox(Real _xMin, Real _xMax, Real _yMin, Real _yMax, Real _zMin, Real _zMa
 minxyz(Vector3R(_xMin, _yMin, _zMin)), maxxyz(Vector3R(_xMax, _yMax, _zMax)) {}
 
 bool BBox::contain(const Vector3R& p) {
-	return (minxyz[0] - Limit::Epsilon < p[0] && p[0] < maxxyz[0] + Limit::Epsilon) &&
-		(minxyz[1] - Limit::Epsilon < p[1] && p[1] < maxxyz[1] + Limit::Epsilon) &&
-		(maxxyz[2] - Limit::Epsilon < p[2] && p[2] < maxxyz[2] + Limit::Epsilon);
+	return 
+		(minxyz[0] - Limit::Epsilon < p[0]) && 
+		(p[0] < maxxyz[0] + Limit::Epsilon) &&
+		(minxyz[1] - Limit::Epsilon < p[1]) &&
+		(p[1] < maxxyz[1] + Limit::Epsilon) &&
+		(maxxyz[2] - Limit::Epsilon < p[2]) && 
+		(p[2] < maxxyz[2] + Limit::Epsilon);
 }
 
 void BBox::fit(const std::vector<int>& f) {
@@ -55,15 +27,57 @@ bool BBox::overlap(const BBox& bBox) {
 }
 
 bool BBox::overlap(const Vector3R& v1, const Vector3R& v2, const Vector3R& v3) {
-	BBox b(min(v1[0], v2[0], v3[0]), max(v1[0], v2[0], v3[0]),
-		min(v1[1], v2[1], v3[1]), max(v1[1], v2[1], v3[1]),
-		min(v1[2], v2[2], v3[2]), max(v1[2], v2[2], v3[2]));
+	// todo : naive
+	BBox b(min(v1[0], v2[0], v3[0]) - Limit::Epsilon, max(v1[0], v2[0], v3[0]) + Limit::Epsilon,
+		min(v1[1], v2[1], v3[1]) - Limit::Epsilon, max(v1[1], v2[1], v3[1]) + Limit::Epsilon,
+		min(v1[2], v2[2], v3[2]) - Limit::Epsilon, max(v1[2], v2[2], v3[2]) + Limit::Epsilon);
 	return overlap(b);
 }
 
-bool BBox::intersectRay(const Ray& ray) {
+bool BBox::intersectRay(const Ray& r) {
 	// todo
-	return true;
+	Real tmin, tmax, tymin, tymax, tzmin, tzmax; 
+	if (r.direction[0] >= 0) {
+		tmin = (minxyz[0] - r.source[0]) / r.direction[0]; 
+		tmax = (maxxyz[0] - r.source[0]) / r.direction[0]; 
+	}
+	else { 
+		tmin = (maxxyz[0] - r.source[0]) / r.direction[0]; 
+		tmax = (minxyz[0] - r.source[0]) / r.direction[0]; 
+	} 
+	if (r.direction[1] >= 0) { 
+		tymin = (minxyz[1] - r.source[1]) / r.direction[1]; 
+		tymax = (maxxyz[1] - r.source[1]) / r.direction[1]; 
+	}
+	else {
+		tymin = (maxxyz[1] - r.source[1]) / r.direction[1];
+		tymax = (minxyz[1] - r.source[1]) / r.direction[1]; 
+	} 
+	if ((tmin > tymax) || (tymin > tmax)) 
+		return false;
+
+	if (tymin > tmin) 
+		tmin = tymin; 
+	if (tymax < tmax) 
+		tmax = tymax; 
+	
+	if (r.direction[2] >= 0) {
+		tzmin = (minxyz[2] - r.source[2]) / r.direction[2];
+		tzmax = (maxxyz[2] - r.source[2]) / r.direction[2]; 
+	}
+	else {
+		tzmin = (maxxyz[2] - r.source[2]) / r.direction[2]; 
+		tzmax = (minxyz[2] - r.source[2]) / r.direction[2]; 
+	} 
+
+	if ((tmin > tzmax) || (tzmin > tmax)) 
+		return false; 
+	if (tzmin > tmin) 
+		tmin = tzmin; 
+	if (tzmax < tmax) 
+		tmax = tzmax; 
+	//return ((tmin < t1) && (tmax > 0));
+	return (tmax > 0) && (tmin < tmax);
 }
 
 void BBox::printInfo() {
@@ -100,7 +114,7 @@ void KdtreeNode::split(Scene *scenePtr, int depth) {
 	splitAt = (split1[splitAxis] + split2[splitAxis]) / 2;
 	split1[splitAxis] = splitAt;
 	split2[splitAxis] = splitAt;
-	printf("split along %d, at %f\n", splitAxis, splitAt);
+	//printf("split along %d, at %f\n", splitAxis, splitAt);
 	lChild = new KdtreeNode(BBox(boundingBox.minxyz, split1));
 	rChild = new KdtreeNode(BBox(split2, boundingBox.maxxyz));
 
@@ -124,15 +138,6 @@ void KdtreeNode::split(Scene *scenePtr, int depth) {
 	}
 }
 
-Kdtree::Kdtree()
-{
-}
-
-
-Kdtree::~Kdtree()
-{
-}
-
 Kdtree::Kdtree(Scene *_scenePtr) {
 	scenePtr = _scenePtr;
 	root = new KdtreeNode(BBox(-2, 2, -2, 2, -2, 2));
@@ -141,7 +146,8 @@ Kdtree::Kdtree(Scene *_scenePtr) {
 	for (int i = 0; i < n; i++) {
 		root->facesInside[i] = i;
 	}
-	root->split(scenePtr, 5);
+	root->split(scenePtr, maxDepth);
+	//test(root);
 }
 
 void Kdtree::test(KdtreeNode *cursor) {
@@ -151,70 +157,94 @@ void Kdtree::test(KdtreeNode *cursor) {
 		}
 		cursor->boundingBox.printInfo();
 		printf("\n");
+		printf("%d faces inside", cursor->facesInside.size());
 		return;
 	}
 	test(cursor->lChild);
 	test(cursor->rChild);
 }
 
+//#define LOG
+
 void Kdtree::intersectionTest(const Ray& ray,
-	bool& out_intersected, Real& out_distance, Vector3R& out_normal,
-	bool& out_reflected, Ray& out_reflectingRay,
-	bool& out_refracted, Ray& out_refractingRay, Material& material) {
-	intersectionTest(root, ray, 
-		out_intersected, out_distance, out_normal,
-		out_reflected, out_reflectingRay,
-		out_refracted, out_refractingRay, material);
+	bool& intersected, Real& distance, Vector3R& normal, MaterialPtr &mPtr) {
+	debug_testcount = 0;
+#ifdef LOG
+	printf("intersection test: ray(%f, %f, %f -> %f, %f, %f)\n", ray.source[0], ray.source[1], ray.source[2],
+		ray.direction[0], ray.direction[1], ray.direction[2]);
+#endif
+	// todo;
+	clearCache();
+	intersectionTest(root, ray);
+#ifdef LOG
+	//printf(" :%d: ", debug_testcount);
+	printf("test result %d\n", cacheIntersected);
+	Vector3R pos = ray.source + cacheDistance * ray.direction;
+	printf("intersection at (%f, %f, %f), distance = %f\n", pos[0], pos[1], pos[2], cacheDistance);
+#endif
+	intersected = cacheIntersected;
+	distance = cacheDistance;
+	normal = cacheNormal;
+	mPtr = cacheMPtr;
+	if (cacheMPtr != nullptr) {
+		// memory leak fixed
+		if (mPtr->isTextureKd()) {
+			mPtr = new Material(*cacheMPtr);
+			mPtr->Kd[0] *= textureFilterR;
+			mPtr->Kd[1] *= textureFilterG;
+			mPtr->Kd[2] *= textureFilterB;
+		}
+	}
+	//printf(": %d :", debug_testcount);
 }
 
-bool Kdtree::intersectionTest(KdtreeNode *cursor, const Ray& ray,
-	bool& out_intersected, Real& out_distance, Vector3R& out_normal,
-	bool& out_reflected, Ray& out_reflectingRay,
-	bool& out_refracted, Ray& out_refractingRay, Material& material)  {
+bool Kdtree::intersectionTest(KdtreeNode *cursor, const Ray& ray)  {
 	// if ray do not intersect the bounding box, return false directly.
+#ifdef LOG
+	printf("\n\n KDNODE: intersection test: ray(%f, %f, %f -> %f, %f, %f)\n", ray.source[0], ray.source[1], ray.source[2],
+		ray.direction[0], ray.direction[1], ray.direction[2]);
+	cursor->boundingBox.printInfo();
+#endif
 	if (!cursor->boundingBox.intersectRay(ray)) {
 		return false;
 	}
 
 	if (cursor->isLeaf()) {
+#ifdef LOG
+		printf("leaf: ");
+#endif
 		for (int f : cursor->facesInside) {
-			scenePtr->basicIntersectionTest(ray, scenePtr->faces[f],
-				out_intersected, out_distance, out_normal,
-				out_reflected, out_reflectingRay,
-				out_refracted, out_refractingRay,
-				material);
+			basicIntersectionTest(ray, scenePtr->faces[f]);
+			debug_testcount++;
+#ifdef LOG
+			printf("%d ", f);
+#endif
 		}
 	}
+	
 	else {
 		KdtreeNode *near, *far;
 		near = ray.source[cursor->splitAxis] < cursor->splitAt ? cursor->lChild : cursor->rChild;
 		far = ray.source[cursor->splitAxis] < cursor->splitAt ? cursor->rChild : cursor->lChild;
 
-		bool decided = intersectionTest(near, ray, out_intersected, out_distance, out_normal,
-			out_reflected, out_reflectingRay, out_refracted, out_refractingRay, material);
+		bool decided = intersectionTest(near, ray);
 		if (decided) {
 			return true;
 		}
 		else {
-			// bounding box check should be put here. todo
-			intersectionTest(far, ray, out_intersected, out_distance, out_normal,
-				out_reflected, out_reflectingRay, out_refracted, out_refractingRay, material);
+			// bounding box check should be put here. todo // needless ?
+			intersectionTest(far, ray);
 		}		
 	}
-	if (!out_intersected) {
-		return false;
-	}
-	else {
-		Vector3R intersection = ray.source + out_distance * ray.direction;
+
+	if (cacheIntersected) {
+		Vector3R intersection = ray.source + cacheDistance * ray.direction;
+		// cursor->boundingBox.printInfo();
 		if (cursor->boundingBox.contain(intersection)) {
+			//printf(" |A| ");
 			return true;
 		}
 	}
 	return false;
 }
-
-void Kdtree::intersectionTest_NoAdditionals(const Ray& ray, bool& out_intersected, Real& out_distance) {
-
-}
-
 #pragma endregion

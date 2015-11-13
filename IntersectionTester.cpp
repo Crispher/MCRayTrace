@@ -3,7 +3,6 @@
 #pragma region BASE_INTERSECTION_TESTER
 
 void IntersectionTester::basicIntersectionTest(const Ray &ray, const F& face) {
-
 	const Vector3R &p0 = scenePtr->vertices[face.v[0]].v, &p1 = scenePtr->vertices[face.v[1]].v, &p2 = scenePtr->vertices[face.v[2]].v;
 
 	Vector3R E1 = p1 - p0;
@@ -118,16 +117,19 @@ bool IntersectionTester::visible(const Vector3R &pos1, const Vector3R &pos2) {
 	return true;
 }
 
+void IntersectionTester::clearCache() {
+	cacheDistance = Limit::Infinity;
+	cacheIntersected = false;
+	cacheNormal = Vector3R(1, 0, 0);
+	cacheMPtr = nullptr;
+}
+
 #pragma endregion
 
 #pragma region SIMPLE_TESTER
 
 void SimpleIntersectionTester::intersectionTest(const Ray &ray, bool &intersected, Real &distance, Vector3R &normal, MaterialPtr &mPtr) {
-	cacheDistance = Limit::Infinity;
-	cacheIntersected = false;
-	cacheNormal = Vector3R(1, 0, 0);
-	cacheMPtr = nullptr;
-	
+	clearCache();
 	int n = scenePtr->faces.size();
 	for (int i = 0; i < n; i++) {
 		basicIntersectionTest(ray, scenePtr->faces[i]);

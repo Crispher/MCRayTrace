@@ -1,5 +1,6 @@
 #include "Renderer.h"
 #include "stdafx.h"
+#include "Kdtree.h"
 #define SHOW_PROGRESS
 
 #pragma region PIXEL_RENDERER
@@ -121,9 +122,17 @@ void ImageRenderer::fromRaw(const char* rawfile) {
 }
 
 void ImageRenderer::renderImageThreading(ThreadingTask &task) {
-	SimpleIntersectionTester sit;
+	// SimpleIntersectionTester sit;
+	//Kdtree sit(renderSetting->scenePtr);
+	IntersectionTester *it;
 	MonteCarloRayTracer mcrt;
-
+	if (renderSetting->intersectiontester == "SimpleIntersectionTester") {
+		it = new SimpleIntersectionTester();
+		it->scenePtr = renderSetting->scenePtr;
+	}
+	else if (renderSetting->intersectiontester == "KdtreeIntersectionTester") {
+		it = new Kdtree(renderSetting->scenePtr);
+	}
 	PixelRenderer pr;
 
 	if (renderSetting->rayTracerSampler == "Stratified") {
@@ -153,15 +162,16 @@ void ImageRenderer::renderImageThreading(ThreadingTask &task) {
 	mcrt.samplerPtr->generatePreSample_Diffuse_Single(737797);
 	mcrt.samplerPtr->generatePreSample_Specular_Single(717977, 1000);
 
-	sit.scenePtr = renderSetting->scenePtr;
-
 	mcrt.depth = renderSetting->rayTraceDepth;
-	mcrt.intersectionTesterPtr = &sit;
+	mcrt.intersectionTesterPtr = it;
 	mcrt.sampleSize = renderSetting->BRDF_sampleSize;
 
 	pr.cameraPtr = renderSetting->cameraPtr;
 	pr.rayTracerPtr = &mcrt;
 	pr.sampleSize = renderSetting->pixelSampleSize;
+/*
+	Color c = pr.renderPixel(30, 390);
+	exit(0);*/
 
 	for (int i = task.start; i < task.end; i++) {
 		printf("line %d being rendered\n", i);

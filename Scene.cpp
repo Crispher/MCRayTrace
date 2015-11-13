@@ -42,7 +42,7 @@ void Camera::printInfo() {
 #pragma endregion
 
 void Scene::constructScene() {
-	printf("Constructing scene...\n");
+	printf("Constructing scene... %d objects.\n", objects.size());
 	std::vector<F> faces_temp_ls, faces_temp_nls;
 	
 	int n = objects.size();
@@ -64,12 +64,12 @@ void Scene::constructScene() {
 			for (int k = 0; k < temp.vt.size(); ++k) {
 				temp.vt[k] += Toffset;
 			}
-			if (objects[i].faces[j].materialPtr->name == "AreaLightSource") {
-				faces_temp_ls.push_back(objects[i].faces[j]);
+			if (objects[i].faces[j].materialPtr->isLightSource()) {
+				faces_temp_ls.push_back(temp);
 				++numLightSources;
 			}
 			else {
-				faces_temp_nls.push_back(objects[i].faces[j]);
+				faces_temp_nls.push_back(temp);
 			}
 		}
 		Voffset = vertices.size();
@@ -78,7 +78,7 @@ void Scene::constructScene() {
 	}
 	faces.insert(faces.end(), faces_temp_ls.begin(), faces_temp_ls.end());
 	faces.insert(faces.end(), faces_temp_nls.begin(), faces_temp_nls.end());
-	printf("Scene construction complete.\n");
+	printf("Scene construction complete, %d faces\n", faces.size());
 }
 
 #pragma region SCENE_RENDER
