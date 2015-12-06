@@ -17,7 +17,7 @@ Color MonteCarloRayTracer::rayTrace(const Ray& ray, int _depth) {
 	}
 
 	if (mPtr != nullptr && mPtr->isLightSource()) {
-		Color ans = Colors::white.filter(mPtr->Ka[0], mPtr->Ka[1], mPtr->Ka[2]);
+		Color ans = Colors::white.filter(mPtr->Kd);
 		return ans;
 	}
 	// common reflection and refraction.
@@ -91,11 +91,15 @@ Color MonteCarloRayTracer::rayTrace_Single(const Ray& ray, int _depth) {
 	intersectionTesterPtr->intersectionTest(ray, intersected, distance, normal, mPtr);
 	if (!intersected) {
 		return Colors::black;
-		// return Colors::white.filter(0.2, 0.2, 0.2);
+		Real k = ray.direction.dot(Vector3R(0, 1, 1));
+		if (k > 0)
+			return intersectionTesterPtr->scenePtr->ambientLight.scale(k);
+		else
+			return Colors::black;
 	}
 
 	if (mPtr->isLightSource()) {
-		Color ans = Colors::white.filter(mPtr->Ka);
+		Color ans = Colors::white.filter(mPtr->Kd);
 		return ans;
 	}
 	Vector3R pos = ray.source + distance * ray.direction;

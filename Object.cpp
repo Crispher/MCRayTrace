@@ -82,8 +82,7 @@ void Object::load(const char* filename) {
 				Real x, y, z, w;
 				x = boost::lexical_cast<Real>(argv[1]);
 				y = boost::lexical_cast<Real>(argv[2]);
-				z = boost::lexical_cast<Real>(argv[3]);
-				w = argv.size() > 4 ? boost::lexical_cast<Real>(argv[4]) : 1;
+				z = boost::lexical_cast<Real>(0);
 				textures.emplace_back(x, y, z, w);
 				continue;
 			}
@@ -129,7 +128,7 @@ void Object::load(const char* filename) {
 }
 
 Material::Material(const Material& m) {
-	Ka = m.Ka; Kd = m.Kd; Ks = m.Ks;
+	Kd = m.Kd; Ks = m.Ks;
 	Td = m.Td; Ts = m.Ts; 
 	//name = m.name;
 	Ns = m.Ns;
@@ -169,7 +168,7 @@ void Object::loadMtl(const char* filename) {
 			y = boost::lexical_cast<Real>(argv[2]);
 			z = boost::lexical_cast<Real>(argv[3]);
 			Real e = (x + y + z) / 3;
-			mPtr->Ka = vector < Real > {x, y, z, e};
+			//mPtr->Ka = vector < Real > {x, y, z, e};
 			continue;
 		}
 		if (argv[0] == "Kd" && toggle) {
@@ -285,7 +284,6 @@ void Object::printInfo() {
 	}
 	for (auto i : materials) {
 		std::cout << "mtl_" << i.first << ":\n" <<
-			"\tKa: " << i.second->Ka[0] << ", " << i.second->Ka[1] << ", " << i.second->Ka[2] << "\n" <<
 			"\tKd: " << i.second->Kd[0] << ", " << i.second->Kd[1] << ", " << i.second->Kd[2] << "\n" <<
 			"\tKs: " << i.second->Ks[0] << ", " << i.second->Ks[1] << ", " << i.second->Ks[2] << "\n";
 	}

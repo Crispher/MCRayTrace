@@ -5,7 +5,7 @@
 
 struct Camera {
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-		Vector3R position;
+	Vector3R position;
 
 	// should be unit vectors 
 	Vector3R direction;
@@ -32,6 +32,27 @@ struct Camera {
 		aperture = _a;
 		focalPlane = _f;
 	}
+	void move(double f, double r, double u) {
+		position += f * direction + r * right + u * up;
+	}
+	void zoomIn(double d) {
+		position += d*direction;
+	}
+	void tiltRight(double d) {
+		direction += d*right;
+		direction.normalize();
+		right = direction.cross(up);
+	}
+	void tiltUp(double d) {
+		direction += d*up;
+		direction.normalize();
+		up = right.cross(direction);
+	}
+	void rotate(double d) {
+		up += d * right;
+		up.normalize();
+		right = direction.cross(up);
+	}
 	void printInfo();
 };
 
@@ -42,7 +63,7 @@ public:
 	~Scene(){};
 
 	// scene settings
-	Color ambientLight;
+	Color ambientLight = Colors::black;
 	int numLightSources = 0;
 
 	//Camera camera;

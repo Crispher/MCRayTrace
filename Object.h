@@ -84,7 +84,7 @@ public:
 	~Material(){};
 	Material(const Material&);
 	//std::string name;
-	vector<Real> Ka, Kd, Ks, Td, Ts;
+	vector<Real> Kd, Ks, Td, Ts;
 	int Ns = -1;
 
 	Real n = 1; // relative refraction rate

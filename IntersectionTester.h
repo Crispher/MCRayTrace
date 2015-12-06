@@ -13,6 +13,9 @@ public:
 	MaterialPtr cacheMPtr;
 	Real textureFilterR, textureFilterG, textureFilterB;
 
+	std::default_random_engine gen;
+	std::uniform_real_distribution<Real> uniform_01 = std::uniform_real_distribution<Real>(0.0, 1.0);
+
 	IntersectionTester() {};
 	~IntersectionTester() {};
 

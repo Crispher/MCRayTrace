@@ -53,6 +53,7 @@ Color PixelRenderer::reconstruct(const std::vector<Sample2R>& samples2R) {
 void ImageRenderer::renderImage() {
 	if (renderSetting->fromRaw) {
 		fromRaw(renderSetting->rawFile.c_str());
+		return;
 	}
 
 	int w = renderSetting->imageWidth;
@@ -102,24 +103,33 @@ void ImageRenderer::renderImage() {
 		os.close();
 	}
 	screen.show();
+	printf("Adjust your camera:\n");
+	std::string s; double d;
+	std::cin >> s >> d;
+	if (s == "zoomIn") {
+		renderSetting->cameraPtr->zoomIn(d);
+	}
+	else if (s == "tiltUp") {
+		renderSetting->cameraPtr->tiltUp(d);
+	}
+	else if (s == "tiltRight") {
+		renderSetting->cameraPtr->tiltRight(d);
+	} 
+	else if (s == "rotate") {
+		renderSetting->cameraPtr->rotate(d);
+	}
+	else if (s == "move") {
+		double r, u;
+		std::cin >> r >> u;
+		renderSetting->cameraPtr->move(d, r, u);
+	}
+	else {
+		renderSetting->cameraPtr->printInfo();
+		return;
+	}
+	renderImage();
 }
 
-void ImageRenderer::fromRaw(const char* rawfile) {
-	std::ifstream is(rawfile);
-	int w, h;
-	is >> w >> h;
-	Screen screen(w, h);
-	for (int i = 0; i < w; i++) {
-		for (int j = 0; j < h; j++) {
-			Real r, g, b;
-			is >> r >> g >> b;
-			Color color(r, g, b);
-			screen.color = color.filter(10, 10, 10);
-			screen.drawPixel(i, j);
-		}
-	}
-	screen.show();
-}
 
 void ImageRenderer::renderImageThreading(ThreadingTask &task) {
 	// SimpleIntersectionTester sit;
@@ -161,6 +171,7 @@ void ImageRenderer::renderImageThreading(ThreadingTask &task) {
 	mcrt.samplerPtr->generatePreSample_Diffuse(renderSetting->BRDF_sampleSize, 7379);
 	mcrt.samplerPtr->generatePreSample_Diffuse_Single(737797);
 	mcrt.samplerPtr->generatePreSample_Specular_Single(717977, 1000);
+	mcrt.samplerPtr->generatePreSample_Specular_Single(717997, 500);
 
 	mcrt.depth = renderSetting->rayTraceDepth;
 	mcrt.intersectionTesterPtr = it;
@@ -199,6 +210,13 @@ RenderSetting::RenderSetting(const char *filename) {
 	while (std::getline(in, line)) {
 		std::vector<std::string> argv;
 		boost::split(argv, line, boost::is_any_of("\t "));
+		if (argv[0] == "ambient") {
+			Real
+				x = boost::lexical_cast<Real>(argv[1]),
+				y = boost::lexical_cast<Real>(argv[2]),
+				z = boost::lexical_cast<Real>(argv[3]);
+			scenePtr->ambientLight = Colors::white.filter(x, y, z);
+		}
 		if (argv[0] == "object") {
 			scenePtr->loadObject(argv[1].c_str());
 			
@@ -243,6 +261,28 @@ RenderSetting::RenderSetting(const char *filename) {
 				cameraPtr->DOF = true;
 			}
 			continue;
+		}
+		if (argv[0] == "camera::move") {
+			if (argv.size() > 3) {
+				Real
+					x = boost::lexical_cast<Real>(argv[1]),
+					y = boost::lexical_cast<Real>(argv[2]),
+					z = boost::lexical_cast<Real>(argv[3]);
+				cameraPtr->move(x, y, z);
+			}
+			double d = boost::lexical_cast<Real>(argv[2]);
+			if (argv[1] == "zoomIn") {
+				cameraPtr->zoomIn(d);
+			}
+			else if (argv[1] == "tiltUp") {
+				cameraPtr->tiltUp(d);
+			}
+			else if (argv[1] == "tiltRight") {
+				cameraPtr->tiltRight(d);
+			}
+			else if (argv[1] == "rotate") {
+				cameraPtr->rotate(d);
+			}
 		}
 		if (argv[0] == "pixelSampler") {
 			pixelSampler = argv[1];

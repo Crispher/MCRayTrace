@@ -140,7 +140,7 @@ void KdtreeNode::split(Scene *scenePtr, int depth) {
 
 Kdtree::Kdtree(Scene *_scenePtr) {
 	scenePtr = _scenePtr;
-	root = new KdtreeNode(BBox(-2, 2, -2, 2, -2, 2));
+	root = new KdtreeNode(BBox(-20, 20, -20, 20, -20, 20));
 	root->facesInside = vector<int>(scenePtr->faces.size());
 	int n = root->facesInside.size();
 	for (int i = 0; i < n; i++) {
