@@ -19,7 +19,7 @@ A Monte Carlo ray tracer.
       - 2) Eigen library are used to perform linear algebra calculations; 
       - 3) some utilities in boost are also used.
     - IDE: visual studio 2013, platform: windows.
-Images:
-  ![alt tag](https://github.com/Crispher/MCRayTrace/blob/master/images/Image22.png)
-  ![alt tag](https://github.com/Crispher/MCRayTrace/blob/master/images/Image15.png)
-  ![alt tag](https://github.com/Crispher/MCRayTrace/blob/master/images/Image7.png)
+  - Images (more in the image/* folder)
+    ![alt tag](https://github.com/Crispher/MCRayTrace/blob/master/images/Image22.png)
+    ![alt tag](https://github.com/Crispher/MCRayTrace/blob/master/images/Image15.png)
+    ![alt tag](https://github.com/Crispher/MCRayTrace/blob/master/images/Image7.png)
