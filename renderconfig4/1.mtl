@@ -1,0 +1,30 @@
+newmtl floor
+Kd 0 0 0
+Ks 1 1 1
+Ns 1000
+bump renderconfig4/bubble.jpg Kd
+newmtl white
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+newmtl AreaLightSource
+Kd 1 1 1
+Ks 0 0 0
+texture renderconfig4/bubble.jpg Kd
+newmtl glass
+Ka 0 0 0
+Kd 0 0 0
+Ks 0.1 0.1 0.1
+Ns 1000
+Tr 1
+Td 0 0 0
+Ts 0.9 0.9 0.9
+Nst 1000
+n 1.5
+newmtl metal
+Kd 0 0 0
+Ks 1 1 1
+Ns 1000
+newmtl global_scatter
+Kd 1 1 1
+Ks 0 0 0
