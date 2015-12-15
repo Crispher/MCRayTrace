@@ -92,7 +92,7 @@ public:
 	Texture *texturePtr;
 	unsigned short flag = 0; // 1 rd | 2 rs | 4 tr | 8 td | 16 ts | 32 texture | 64 brdf | channel: 128 bump | 256 Kd | Ks | Td | Ts | islightsource | fresnel
 	inline void setRd() { flag |= 1; }
-	inline void setRs() { flag |= 2; }
+	inline void setRs() { flag |= (1 << 1); }
 	inline void setTr() { flag |= 4; }
 	inline void setTd() { flag |= 8; }
 	inline void setTs() { flag |= 16; }
@@ -101,10 +101,11 @@ public:
 	inline void setBump() { flag |= 128; }
 	inline void setTextureKd() { flag |= 256; }
 	inline void setTextureKs() { flag |= 512; }
-	inline void setTextureTd() { flag |= 1024; }
+	inline void setTextureTd() { flag |= (1 << 10); }
 	inline void setTextureTs() { flag |= 2048; }
 	inline void setLightsource() { flag |= 4096; }
 	inline void setFresnel() { flag |= 8192; }
+	inline void setScatter() { flag |= (1 << 14); }
 	bool isRd() { return flag & 1; }
 	bool isRs() { return flag & 2; }
 	bool isTr() { return flag & 4; }
@@ -119,6 +120,7 @@ public:
 	bool isTextureTs() { return flag & 2048; }
 	bool isLightSource() { return flag & 4096; }
 	bool isFresnel() { return flag & 8192; }
+	bool isScatter() { return flag & (1 << 14); }
 };
 
 typedef Material *MaterialPtr;

@@ -11,8 +11,8 @@ void ImageRenderer::fromRaw(const char* rawfile) {
 			Real r, g, b;
 			is >> r >> g >> b;
 			Color color(r, g, b);
-			color = color.filter(5, 5, 3);
-			screen.color = color.gammaCorrection(0.6);
+			color = color.filter(20, 20, 16);
+			screen.color = color.gammaCorrection(0.7);
 			screen.drawPixel(i, j);
 		}
 	}

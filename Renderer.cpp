@@ -180,6 +180,8 @@ void ImageRenderer::renderImageThreading(ThreadingTask &task) {
 	pr.cameraPtr = renderSetting->cameraPtr;
 	pr.rayTracerPtr = &mcrt;
 	pr.sampleSize = renderSetting->pixelSampleSize;
+
+	it->sampler = mcrt.samplerPtr;
 /*
 	Color c = pr.renderPixel(30, 390);
 	exit(0);*/

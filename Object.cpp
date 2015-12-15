@@ -268,6 +268,9 @@ void Object::loadMtl(const char* filename) {
 			// todo;
 			continue;
 		}
+		if (argv[0] == "scatter" && toggle) {
+			mPtr->setScatter();
+		}
 	}
 	if (toggle) {
 		materials.insert(std::pair<std::string, MaterialPtr>(lastMtlName, mPtr));

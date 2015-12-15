@@ -64,6 +64,7 @@ public:
 
 	// scene settings
 	Color ambientLight = Colors::black;
+	MaterialPtr scatterMtl;
 	int numLightSources = 0;
 
 	//Camera camera;

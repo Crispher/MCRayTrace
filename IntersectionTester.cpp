@@ -60,9 +60,10 @@ void IntersectionTester::basicIntersectionTest(const Ray &ray, const F& face) {
 			Real shiftY = cacheMPtr->texturePtr->bump[tI][tJ + 1] - cacheMPtr->texturePtr->bump[tI][tJ];
 			cacheNormal = (cacheNormal + 10 * (shiftH * shiftX + shiftV * shiftY)).normalized();*/
 			Real shiftX = 2 * uniform_01(gen) - 1;
-			shiftX = pow(shiftX, 3);
+			shiftX = (shiftX / abs(shiftX)) * pow(abs(shiftX), 1.7);
 			Vector3R pos = ray.source + cacheDistance * ray.direction;
-			Vector3R shift = (pos - Vector3R(0, 0, -1)).normalized();
+			Vector3R shift = (pos - Vector3R(0.3, 0.3, 0)).normalized();
+			//Vector3R shift = Vector3R(0, 1, 0);
 			cacheNormal = 2 * shift * shiftX + sqrt(1 - shiftX * shiftX) * cacheNormal;
 			cacheNormal.normalize();
 			return;
@@ -70,6 +71,9 @@ void IntersectionTester::basicIntersectionTest(const Ray &ray, const F& face) {
 		textureFilterR = cacheMPtr->texturePtr->texture[tI][tJ][0];
 		textureFilterG = cacheMPtr->texturePtr->texture[tI][tJ][1];
 		textureFilterB = cacheMPtr->texturePtr->texture[tI][tJ][2];
+		/*textureFilterR *= textureFilterR;
+		textureFilterG *= textureFilterG;
+		textureFilterB *= textureFilterB;*/
 		return;
 	}
 }
@@ -137,6 +141,11 @@ void IntersectionTester::clearCache() {
 
 void SimpleIntersectionTester::intersectionTest(const Ray &ray, bool &intersected, Real &distance, Vector3R &normal, MaterialPtr &mPtr) {
 	clearCache();
+	//scatterMode = false;
+	/*if (scatterMode) {
+		cacheDistance = exponential_scatter(gen);
+	}*/
+
 	int n = scenePtr->faces.size();
 	for (int i = 0; i < n; i++) {
 		basicIntersectionTest(ray, scenePtr->faces[i]);
@@ -158,6 +167,15 @@ void SimpleIntersectionTester::intersectionTest(const Ray &ray, bool &intersecte
 			mPtr->Kd[2] *= textureFilterB;
 		}
 	}
+	/*if (scatterMode && !intersected && cacheDistance < 5) {
+		normal = sampler->sample_Diffuse_P(-ray.direction);
+		intersected = true;
+		mPtr = scenePtr->scatterMtl;
+		if (mPtr->Kd.size() == 0) {
+			printf("bug");
+			exit(0);
+		}
+	}*/
 }
 
 #pragma endregion

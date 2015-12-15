@@ -78,6 +78,10 @@ void Scene::constructScene() {
 	}
 	faces.insert(faces.end(), faces_temp_ls.begin(), faces_temp_ls.end());
 	faces.insert(faces.end(), faces_temp_nls.begin(), faces_temp_nls.end());
+
+	printf("looking for scattering mtl\n");
+	scatterMtl = objects[0].materials["global_scatter"];
+	printf("%x\n", scatterMtl->flag);
 	printf("Scene construction complete, %d faces\n", faces.size());
 }
 

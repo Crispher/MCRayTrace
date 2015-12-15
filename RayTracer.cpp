@@ -90,17 +90,22 @@ Color MonteCarloRayTracer::rayTrace_Single(const Ray& ray, int _depth) {
 	MaterialPtr mPtr = nullptr;
 	intersectionTesterPtr->intersectionTest(ray, intersected, distance, normal, mPtr);
 	if (!intersected) {
-		return Colors::black;
-		Real k = ray.direction.dot(Vector3R(0, 1, 1));
-		if (k > 0)
-			return intersectionTesterPtr->scenePtr->ambientLight.scale(k);
-		else
-			return Colors::black;
+		//return Colors::black;
+		//Real k = ray.direction.dot(Vector3R(0, 1, 1));
+		//if (k > 0)
+			//return intersectionTesterPtr->scenePtr->ambientLight.scale(k);
+		//else
+			//return Colors::black;
+		return intersectionTesterPtr->scenePtr->ambientLight;
 	}
 
 	if (mPtr->isLightSource()) {
 		Color ans = Colors::white.filter(mPtr->Kd);
+		if (mPtr->isTextured()) {
+			delete mPtr;
+		}
 		return ans;
+		return ans.scale(pow(abs(ray.direction.dot(Vector3R(0, 0, 1))), 4));
 	}
 	Vector3R pos = ray.source + distance * ray.direction;
 	Color ans;

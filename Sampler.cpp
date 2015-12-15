@@ -213,7 +213,7 @@ Sample Sampler::sample(const Vector3R &in, const Vector3R &normal, const Materia
 		else {
 			ans.type = RE_S;
 			ans.weight = 1 - wd;
-			ans.v = sample_Specular_P(IntersectionTester::reflect(in, normal), normal, mPtr->Ns);
+			ans.v = sample_Specular_P(reflect(in, normal), normal, mPtr->Ns);
 			return ans;
 		}
 	}
@@ -232,7 +232,7 @@ Sample Sampler::sample(const Vector3R &in, const Vector3R &normal, const Materia
 			else if (rand + Limit::Epsilon < (t += (w = mPtr->Ks[3] / total))) {
 				ans.type = RE_S;
 				ans.weight = w;
-				ans.v = sample_Specular_P(IntersectionTester::reflect(in, normal), normal, mPtr->Ns);
+				ans.v = sample_Specular_P(reflect(in, normal), normal, mPtr->Ns);
 				return ans;
 			}
 			else if (rand - Limit::Epsilon< (t += (w = mPtr->Td[3] / total))) {
@@ -244,7 +244,7 @@ Sample Sampler::sample(const Vector3R &in, const Vector3R &normal, const Materia
 			else {
 				ans.type = TR_S;
 				ans.weight = 1 - t;
-				ans.v = sample_Specular_P(IntersectionTester::refract(in, normal, mPtr->n), normal, mPtr->Nst);
+				ans.v = sample_Specular_P(refract(in, normal, mPtr->n), normal, mPtr->Nst);
 				return ans;
 			}
 		}
@@ -261,7 +261,7 @@ Sample Sampler::sample(const Vector3R &in, const Vector3R &normal, const Materia
 			else {
 				ans.type = TR_S;
 				ans.weight = 1 - wd;
-				ans.v = sample_Specular_P(IntersectionTester::refract(in, normal, mPtr->n), normal, mPtr->Nst);
+				ans.v = sample_Specular_P(refract(in, normal, mPtr->n), normal, mPtr->Nst);
 				return ans;
 			}
 		}

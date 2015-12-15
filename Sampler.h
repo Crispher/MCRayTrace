@@ -3,7 +3,7 @@
 #include "Screen.h"
 #include "Object.h"
 #include "Scene.h"
-#include "IntersectionTester.h"
+//#include "IntersectionTester.h"
 enum rayType {RE_D, RE_S, TR_D, TR_S};
 
 struct Sample {
