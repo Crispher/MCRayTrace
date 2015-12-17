@@ -7,8 +7,7 @@
 #include "renderer.h"
 
 int main() {
-	RenderSetting rs("renderconfig4/1.cfg");
-	//RenderSetting rs("render.cfg");
+	RenderSetting rs("renderconfig2/render.cfg");
 	ImageRenderer ir(&rs);
 	ir.renderImage();
 	return 0;

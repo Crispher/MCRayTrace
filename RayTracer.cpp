@@ -1,85 +1,14 @@
 #include "RayTracer.h"
 //#define DEBUG_INFO
-
-Color MonteCarloRayTracer::rayTrace(const Ray& ray, int _depth) {
-	if (_depth == 0) {
-		return Colors::black;
-	}
-
-	bool intersected = false;
-	Real distance = Limit::Infinity;
-	Vector3R normal;
-	MaterialPtr mPtr = nullptr;
-	intersectionTesterPtr->intersectionTest(ray, intersected, distance, normal, mPtr);
-	if (!intersected) {
-		//return Colors::black;
-		return Colors::white.filter(0.5, 0.5, 0.5);
-	}
-
-	if (mPtr != nullptr && mPtr->isLightSource()) {
-		Color ans = Colors::white.filter(mPtr->Kd);
-		return ans;
-	}
-	// common reflection and refraction.
-	Vector3R pos = ray.source + distance * ray.direction;
-	Color ans = Colors::black;
-	
-	bool lookFromOutside = ray.direction.dot(normal) < 0;
-	if (lookFromOutside) {
-		std::vector<Sample, Eigen::aligned_allocator<Vector3R>> samples_diffuse, samples_specular;
-
-		if (mPtr->isRd()) {
-			samples_diffuse = samplerPtr->sample_Diffuse_P(normal, sampleSize);
-			int n = samples_diffuse.size();
-			for (int i = 0; i < n; i++) {
-				Ray _ray(pos, samples_diffuse[i].v);
-				samples_diffuse[i].radiance = rayTrace_Single(_ray, _depth - 1);
-			}
-			ans += integrateDiffuse_Reflect(samples_diffuse, mPtr);
-		}
-		if (mPtr->isRs()) {
-			samples_specular = samplerPtr->sample_Specular_P(reflect(ray.direction, normal), normal, mPtr->Ns, sampleSize);
-			int n = samples_specular.size();
-			for (int i = 0; i < n; i++) {
-				Ray _ray(pos, samples_specular[i].v);
-				samples_specular[i].radiance = rayTrace_Single(_ray, _depth - 1);
-			}
-			ans += integrateSpecular_Reflect(samples_specular, mPtr);
-		}
-	}
-
-	if (mPtr->isTr()) {
-		Real sign = lookFromOutside ? -1 : 1;
-		std::vector<Sample, Eigen::aligned_allocator<Vector3R>> samples_diffuse_r, samples_specular_r;
-
-		if (mPtr->isTd()) {
-			samples_diffuse_r = samplerPtr->sample_Diffuse_P(sign * normal, sampleSize);
-			int n = samples_diffuse_r.size();
-			for (int i = 0; i < n; i++) {
-				Ray _ray(pos, samples_diffuse_r[i].v);
-				samples_diffuse_r[i].radiance = rayTrace_Single(_ray, _depth - 1);
-
-			}
-			ans += integrateDiffuse_Refract(samples_diffuse_r, mPtr);
-		}
-		if (mPtr->isTs()) {
-			samples_specular_r = samplerPtr->sample_Specular_P(refract(ray.direction, normal, mPtr->n), sign * normal, mPtr->Nst, sampleSize);
-			int n = samples_specular_r.size();
-			for (int i = 0; i < n; i++) {
-				Ray _ray(pos, samples_specular_r[i].v);
-				samples_specular_r[i].radiance = rayTrace_Single(_ray, _depth - 1);
-			}
-			ans += integrateSpecular_Refract(samples_specular_r, mPtr);
-		}
-	}
-	if (mPtr->isTextured()) {
-		delete mPtr;
-	}
-	return ans;
+RayTracer::RayTracer(Scene *_s, IntersectionTester *_i, Sampler3D *_sm) :
+scenePtr(_s), intersectionTesterPtr(_i), samplerPtr(_sm) {
 }
 
-Color MonteCarloRayTracer::rayTrace_Single(const Ray& ray, int _depth) {
+Color RayTracer::rayTrace(const Ray& ray, int _depth) {
 	if (_depth == 0) {
+		/*if (intersectionTesterPtr->visible(Vector3R(0, 0, 0), ray.source)) {
+			return Colors::white;
+		}*/
 		return Colors::black;
 		//return RussianRoulette(ray, 0.5);
 	}
@@ -90,37 +19,34 @@ Color MonteCarloRayTracer::rayTrace_Single(const Ray& ray, int _depth) {
 	MaterialPtr mPtr = nullptr;
 	intersectionTesterPtr->intersectionTest(ray, intersected, distance, normal, mPtr);
 	if (!intersected) {
-		//return Colors::black;
-		//Real k = ray.direction.dot(Vector3R(0, 1, 1));
-		//if (k > 0)
-			//return intersectionTesterPtr->scenePtr->ambientLight.scale(k);
-		//else
-			//return Colors::black;
 		return intersectionTesterPtr->scenePtr->ambientLight;
 	}
 
 	if (mPtr->isLightSource()) {
+		if (_depth < depth)
+			return Colors::black;
 		Color ans = Colors::white.filter(mPtr->Kd);
 		if (mPtr->isTextured()) {
 			delete mPtr;
 		}
 		return ans;
-		return ans.scale(pow(abs(ray.direction.dot(Vector3R(0, 0, 1))), 4));
 	}
 	Vector3R pos = ray.source + distance * ray.direction;
 	Color ans;
 
-	Sample s = samplerPtr->sample(ray.direction, normal, mPtr);
+	
+	RaySample s = samplerPtr->sample(ray.direction, normal, mPtr);
 	Ray _ray(pos, s.v);
-	s.radiance = rayTrace_Single(_ray, _depth - 1);
+	s.radiance = rayTrace(_ray, _depth - 1);
 	ans = integrate(s, mPtr);
 	if (mPtr->isTextured()) {
 		delete mPtr;
 	}
+	ans += directLighting(pos, normal).filter(mPtr->Kd);
 	return ans;
 }
 
-Color MonteCarloRayTracer::integrateDiffuse_Reflect(const std::vector<Sample, Eigen::aligned_allocator<Vector3R>> &samples, 
+Color RayTracer::integrateDiffuse_Reflect(const std::vector<RaySample, Eigen::aligned_allocator<Vector3R>> &samples, 
 	const MaterialPtr &mPtr) const {
 	Real r = 0, g = 0, b = 0;
 	int n = samples.size();
@@ -132,7 +58,7 @@ Color MonteCarloRayTracer::integrateDiffuse_Reflect(const std::vector<Sample, Ei
 	return Color(r * mPtr->Kd[0] / n, g * mPtr->Kd[1] / n, b * mPtr->Kd[2] / n);
 }
 
-Color MonteCarloRayTracer::integrateSpecular_Reflect(const std::vector<Sample, Eigen::aligned_allocator<Vector3R>> &samples, 
+Color RayTracer::integrateSpecular_Reflect(const std::vector<RaySample, Eigen::aligned_allocator<Vector3R>> &samples, 
 	const MaterialPtr &mPtr) const {
 	Real r = 0, g = 0, b = 0;
 	int n = samples.size();
@@ -144,7 +70,7 @@ Color MonteCarloRayTracer::integrateSpecular_Reflect(const std::vector<Sample, E
 	return Color(r * mPtr->Ks[0] / n, g * mPtr->Ks[1] / n, b * mPtr->Ks[2] / n);
 }
 
-Color MonteCarloRayTracer::integrateDiffuse_Refract(const std::vector<Sample, Eigen::aligned_allocator<Vector3R>>& samples, 
+Color RayTracer::integrateDiffuse_Refract(const std::vector<RaySample, Eigen::aligned_allocator<Vector3R>>& samples, 
 	const MaterialPtr &mPtr) const {
 	Real r = 0, g = 0, b = 0;
 	int n = samples.size();
@@ -156,7 +82,7 @@ Color MonteCarloRayTracer::integrateDiffuse_Refract(const std::vector<Sample, Ei
 	return Color(r * mPtr->Td[0] / n, g * mPtr->Td[1] / n, b * mPtr->Td[2] / n);
 }
 
-Color MonteCarloRayTracer::integrateSpecular_Refract(const std::vector<Sample, Eigen::aligned_allocator<Vector3R>>& samples, 
+Color RayTracer::integrateSpecular_Refract(const std::vector<RaySample, Eigen::aligned_allocator<Vector3R>>& samples, 
 	const MaterialPtr &mPtr) const {
 	Real r = 0, g = 0, b = 0;
 	int n = samples.size();
@@ -168,7 +94,7 @@ Color MonteCarloRayTracer::integrateSpecular_Refract(const std::vector<Sample, E
 	return Color(r * mPtr->Ts[0] / n, g * mPtr->Ts[1] / n, b * mPtr->Ts[2] / n);
 }
 
-Color MonteCarloRayTracer::integrate(const Sample &s, const MaterialPtr &mPtr) {
+Color RayTracer::integrate(const RaySample&s, const MaterialPtr &mPtr) {
 	switch (s.type) {
 	case RE_D:
 		return s.radiance.filter(mPtr->Kd, s.weight);
@@ -183,13 +109,41 @@ Color MonteCarloRayTracer::integrate(const Sample &s, const MaterialPtr &mPtr) {
 	}
 }
 
-Color MonteCarloRayTracer::RussianRoulette(const Ray& ray, Real factor) {
-	Real rand = samplerPtr->uniform_01(samplerPtr->gen);
+Color RayTracer::RussianRoulette(const Ray& ray, Real factor) {
+	Real rand = samplerPtr->getUniform_01();
 	if (rand > factor) {
 		return Colors::black;
 	}
 	else {
 		// with prob. p go on
-		return rayTrace_Single(ray, 1).scale(1. / factor);
+		return rayTrace(ray, 1).scale(1. / factor);
 	}
+}
+
+Color RayTracer::directLighting(const Vector3R &pos, const Vector3R &normal) {
+	Color ans = Colors::black;
+	for (int i = 0; i < scenePtr->numLightSources; i++) {
+		MaterialPtr mPtr; Vector3R ls_normal; Real filter = 0; Real area;
+		std::vector<Vector3R, Eigen::aligned_allocator<Vector3R>> samplePos = scenePtr->getLightSourceSamples(i, mPtr, ls_normal, area);
+		for (int j = 0; j < samplePos.size(); j++) {
+			if (intersectionTesterPtr->visible(pos, samplePos[j])) {
+				Vector3R r_pos = pos - samplePos[j];
+				Real cos_theta = -r_pos.normalized().dot(normal);
+				if (cos_theta < 0) {
+					continue;
+				}
+				Real r_squared = r_pos.squaredNorm();
+				//Real cos_gamma = std::max(0.0, r_pos.normalized().dot(ls_normal));
+				Real cos_gamma = abs(r_pos.normalized().dot(ls_normal));
+				if (abs(cos_gamma) > 1 + Limit::Epsilon) {
+					std::cout << cos_gamma << " ||\n " << r_pos << " ||\n " << ls_normal << std::endl;
+					exit(0);
+				}
+				
+				filter += cos_theta * cos_gamma / r_squared;
+			}
+		}
+		ans += Colors::white.filter(mPtr->Kd).scale(filter / samplePos.size() * area / Constants::Pi);
+	}
+	return ans;
 }

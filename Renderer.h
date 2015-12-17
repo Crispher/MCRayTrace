@@ -10,13 +10,13 @@ class PixelRenderer {
 public:
 	Camera *cameraPtr;
 	RayTracer *rayTracerPtr;
-	Sampler *samplerPtr;
+    Sampler2D *samplerPtr;
 	int sampleSize;
 
 	PixelRenderer() {}
 	Color renderPixel(int i, int j);
 private:
-	Color reconstruct(const std::vector<Sample2R>&);
+	Color reconstruct(const std::vector<Sample2D>&);
 };
 
 class RenderSetting {

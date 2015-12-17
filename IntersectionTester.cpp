@@ -30,6 +30,11 @@ void IntersectionTester::basicIntersectionTest(const Ray &ray, const F& face) {
 
 	cacheIntersected = true;
 	cacheDistance = t;
+
+	if (visibilityTestMode) {
+		return;
+	}
+
 	Vector3R n =
 		scenePtr->normals[face.vn[0]].v * w + scenePtr->normals[face.vn[1]].v * u + scenePtr->normals[face.vn[2]].v * v;
 	cacheNormal = n.normalized();
@@ -71,9 +76,6 @@ void IntersectionTester::basicIntersectionTest(const Ray &ray, const F& face) {
 		textureFilterR = cacheMPtr->texturePtr->texture[tI][tJ][0];
 		textureFilterG = cacheMPtr->texturePtr->texture[tI][tJ][1];
 		textureFilterB = cacheMPtr->texturePtr->texture[tI][tJ][2];
-		/*textureFilterR *= textureFilterR;
-		textureFilterG *= textureFilterG;
-		textureFilterB *= textureFilterB;*/
 		return;
 	}
 }
@@ -104,6 +106,7 @@ void IntersectionTester::basicIntersectionTest(const Ray &ray, const Sphere& sph
 }
 
 bool IntersectionTester::visible(const Vector3R &pos1, const Vector3R &pos2) {
+	visibilityTestMode = true;
 	Ray ray = Ray::fromPoints(pos1, pos2);
 	Real d = (pos2 - pos1).norm();
 	cacheDistance = d;
@@ -115,6 +118,7 @@ bool IntersectionTester::visible(const Vector3R &pos1, const Vector3R &pos2) {
 	for (int i = 0; i < n; i++) {
 		basicIntersectionTest(ray, scenePtr->faces[i]);
 		if (cacheDistance < d - Limit::Epsilon) {
+			visibilityTestMode = false;
 			return false;
 		}
 	}
@@ -122,9 +126,11 @@ bool IntersectionTester::visible(const Vector3R &pos1, const Vector3R &pos2) {
 	for (int i = 0; i < n; i++) {
 		basicIntersectionTest(ray, scenePtr->spheres[i]);
 		if (cacheDistance < d - Limit::Epsilon) {
+			visibilityTestMode = false;
 			return false;
 		}
 	}
+	visibilityTestMode = false;
 	return true;
 }
 
@@ -133,6 +139,8 @@ void IntersectionTester::clearCache() {
 	cacheIntersected = false;
 	cacheNormal = Vector3R(1, 0, 0);
 	cacheMPtr = nullptr;
+	cacheU = 0;
+	cacheV = 0;
 }
 
 #pragma endregion

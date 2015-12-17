@@ -2,204 +2,98 @@
 
 #pragma region BASE_SAMPLER
 
-std::vector<Sample, Eigen::aligned_allocator<Vector3R>> Sampler::
-sample_Diffuse(const Vector3R &normal, int sampleSize) {
-	Vector3R dummy(uniform_01(gen), uniform_01(gen), uniform_01(gen));
-	Vector3R x = dummy.cross(normal).normalized();
-	Vector3R y = normal.cross(x);
-	std::vector<Sample2R> samples2R = sample_UnitSquare_Uniform(sampleSize);
-	std::vector<Sample, Eigen::aligned_allocator<Vector3R>> samples3R(sampleSize * sampleSize);
-
-	for (int i = 0; i < samples2R.size(); i++) {
-		Real sq = sqrt(samples2R[i].u);
-		samples3R[i].v =
-			((sq * cos(2 * Constants::Pi * samples2R[i].v)) * x) +
-			((sq * sin(2 * Constants::Pi * samples2R[i].v)) * y) +
-			sqrt(1 - samples2R[i].u) * normal;
-		samples3R[i].weight = 1;
-	}
-	return samples3R;
+Sampler3D::Sampler3D() {
+	generatePreSamples_Diffuse(737797);
+	generatePreSamples_Specular(717977, 1000);
 }
 
-std::vector<Sample, Eigen::aligned_allocator<Vector3R>> Sampler::
-sample_Specular(const Vector3R& out, const Vector3R& normal, int N, int sampleSize) {
-	Vector3R x = out.cross(normal).normalized();
-	Vector3R y = out.cross(x);
-	std::vector<Sample2R> samples2R = sample_UnitSquare_Uniform(sampleSize);
-	std::vector<Sample, Eigen::aligned_allocator<Vector3R>> samples3R(sampleSize * sampleSize);
-	for (int i = 0; i < samples2R.size(); i++) {
-		Real cosphi = pow(1 - samples2R[i].u, 1. / N);
-		Real sinphi = sqrt(1 - cosphi * cosphi);
-		Real theta = 2 * Constants::Pi * samples2R[i].v;
-		samples3R[i].v =
-			(sinphi * cos(theta) * x) +
-			(sinphi * sin(theta) * y) +
-			cosphi * out;
-		samples3R[i].weight = 1;
-	}
-	return samples3R;
-}
-
-void Sampler::generatePreSample_Diffuse(int groupSize, int numGroups) {
-	presamples_Diffuse.cursor = 0;
-	presamples_Diffuse.numGroups = numGroups;
-	presamples_Diffuse.elemPerGroup = sample_UnitSquare_Uniform(groupSize).size();
-
-	for (int i = 0; i < numGroups; i++) {
-		std::vector<Sample2R> samples2R = sample_UnitSquare_Uniform(groupSize);
-		for (int j = 0; j < presamples_Diffuse.elemPerGroup; j++) {
-			Real sq = sqrt(samples2R[j].u);
-			presamples_Diffuse.presamples.push_back(
-				PreSample(
-				sq * cos(2 * Constants::Pi * samples2R[j].v),
-				sq * sin(2 * Constants::Pi * samples2R[j].v),
-				sqrt(1 - samples2R[j].u),
-				1));
+std::vector<Sample2D> Sampler2D::sampleTriangle(int n) {
+	std::vector<Sample2D> samples2D = sample_UnitSquare_Uniform(n);
+	for (int i = 0; i < samples2D.size(); i++) {
+		if (samples2D[i].u + samples2D[i].v > 1) {
+			Real temp = samples2D[i].u;
+			samples2D[i].u = 1.0 - samples2D[i].v;
+			samples2D[i].v = 1.0 - temp;
+		}
+		if (samples2D[i].v < 0 || samples2D[i].u < 0 || samples2D[i].v + samples2D[i].u > 1) {
+			printf("error\n");
+			exit(0);
 		}
 	}
+	return samples2D;
 }
 
-void Sampler::generatePreSample_Diffuse_Single(int numSamples) {
-	// this code copy-paste the above function and is not efficient, however it cannot be the bottleneck.
+Sample2D Sampler3D::sampleUnitSquare_Uniform() {
+	return Sample2D(uniform_01(gen), uniform_01(gen));
+}
+
+Real Sampler3D::getUniform_01() {
+	return uniform_01(gen);
+}
+
+void Sampler3D::generatePreSamples_Diffuse(int numSamples) {
 	presamples_Diffuse_Single.cursor = 0;
-	presamples_Diffuse_Single.numGroups = numSamples;
-	presamples_Diffuse_Single.elemPerGroup = sample_UnitSquare_Uniform(1).size();
-
+	presamples_Diffuse_Single.elementCount = numSamples;
 	for (int i = 0; i < numSamples; i++) {
-		std::vector<Sample2R> samples2R = sample_UnitSquare_Uniform(1);
-		for (int j = 0; j < presamples_Diffuse_Single.elemPerGroup; j++) {
-			Real sq = sqrt(samples2R[j].u);
-			presamples_Diffuse_Single.presamples.push_back(
-				PreSample(
-				sq * cos(2 * Constants::Pi * samples2R[j].v),
-				sq * sin(2 * Constants::Pi * samples2R[j].v),
-				sqrt(1 - samples2R[j].u),
-				1));
-		}
+		Sample2D sample2D = sampleUnitSquare_Uniform();
+		Real sq = sqrt(sample2D.u);
+		presamples_Diffuse_Single.presamples.push_back(
+			PreSample3D(
+			sq * cos(2 * Constants::Pi * sample2D.v),
+			sq * sin(2 * Constants::Pi * sample2D.v),
+			sqrt(1 - sample2D.u),
+			1));
 	}
 }
 
-void Sampler::generatePreSample_Specular(int groupSize, int numGroups, int N) {
-	if (presamples_Specular.find(N) != presamples_Specular.end() || N < 0) {
-		return;
-	}
-
-	PreSamplePool psp;
-	psp.cursor = 0;
-	psp.numGroups = numGroups;
-	psp.elemPerGroup = sample_UnitSquare_Uniform(groupSize).size();
-
-	for (int i = 0; i < numGroups; i++) {
-		std::vector<Sample2R> samples2R = sample_UnitSquare_Uniform(groupSize);
-		for (int j = 0; j < psp.elemPerGroup; j++) {
-			Real cosphi;
-			if (N >= 1000) {
-				cosphi = 1;
-			}
-			else {
-				cosphi = pow(1 - samples2R[j].u, 1. / N);
-			}
-			Real sinphi = sqrt(1 - cosphi * cosphi);
-			Real theta = 2 * Constants::Pi * samples2R[j].v;
-			psp.presamples.push_back(PreSample(
-				sinphi * cos(theta),
-				sinphi * sin(theta),
-				cosphi,
-				1));
-		}
-	}
-	presamples_Specular.insert(std::pair<int, PreSamplePool>(N, psp));
-}
-
-void Sampler::generatePreSample_Specular_Single(int numSamples, int N) {
+void Sampler3D::generatePreSamples_Specular(int numSamples, int N) {
 	if (presamples_Specular_Single.find(N) != presamples_Specular_Single.end() || N < 0) {
 		return;
 	}
-	PreSamplePool psp;
+	PreSamplePool3D psp;
 	psp.cursor = 0;
-	psp.numGroups = numSamples;
-	psp.elemPerGroup = sample_UnitSquare_Uniform(1).size();
+	psp.elementCount = numSamples;
 	for (int i = 0; i < numSamples; i++) {
-		std::vector<Sample2R> samples2R = sample_UnitSquare_Uniform(1);
-		for (int j = 0; j < psp.elemPerGroup; j++) {
-			Real cosphi;
-			if (N >= 1000) {
-				cosphi = 1;
-			}
-			else {
-				cosphi = pow(1 - samples2R[j].u, 1. / N);
-			}
-			Real sinphi = sqrt(1 - cosphi * cosphi);
-			Real theta = 2 * Constants::Pi * samples2R[j].v;
-			psp.presamples.push_back(PreSample(
-				sinphi * cos(theta),
-				sinphi * sin(theta),
-				cosphi,
-				1));
+		Sample2D sample2D = sampleUnitSquare_Uniform();
+		Real cosphi;
+		if (N >= 1000) {
+			cosphi = 1;
 		}
+		else {
+			cosphi = pow(1 - sample2D.u, 1. / N);
+		}
+		Real sinphi = sqrt(1 - cosphi * cosphi);
+		Real theta = 2 * Constants::Pi * sample2D.v;
+		psp.presamples.push_back(PreSample3D(
+			sinphi * cos(theta),
+			sinphi * sin(theta),
+			cosphi,
+			1));
 	}
-	presamples_Specular_Single.insert(std::pair<int, PreSamplePool>(N, psp));
+	presamples_Specular_Single.insert(std::pair<int, PreSamplePool3D>(N, psp));
 }
 
-std::vector<Sample, Eigen::aligned_allocator<Vector3R>> Sampler::
-sample_Diffuse_P(const Vector3R &normal, int sampleSize) {
+Vector3R Sampler3D::sample_Diffuse_P(const Vector3R &normal) {
 	Vector3R dummy(uniform_01(gen), uniform_01(gen), uniform_01(gen));
 	Vector3R x = dummy.cross(normal).normalized();
 	Vector3R y = normal.cross(x);
-	std::vector<Sample, Eigen::aligned_allocator<Vector3R>> samples3R(presamples_Diffuse.elemPerGroup);
-	for (int i = 0; i < presamples_Diffuse.elemPerGroup; i++) {
-		PreSample &ps = presamples_Diffuse.presamples[presamples_Diffuse.cursor + i];
-		samples3R[i].v =
-			(ps.x * x) +
-			(ps.y * y) +
-			ps.z * normal;
-		samples3R[i].weight = ps.weight;
-	}
-	presamples_Diffuse.cursor = 
-		(presamples_Diffuse.elemPerGroup + presamples_Diffuse.cursor) % (presamples_Diffuse.elemPerGroup * presamples_Diffuse.numGroups);
-	return samples3R;
-}
-
-std::vector<Sample, Eigen::aligned_allocator<Vector3R>> Sampler::
-sample_Specular_P(const Vector3R &out, const Vector3R &normal, int N, int sampleSize) {
-	Vector3R x = out.cross(normal).normalized();
-	Vector3R y = out.cross(x);
-	PreSamplePool &psp = presamples_Specular[N];
-
-	std::vector<Sample, Eigen::aligned_allocator<Vector3R>> samples3R(psp.elemPerGroup);
-	for (int i = 0; i < psp.elemPerGroup; i++) {
-		PreSample &ps = psp.presamples[presamples_Diffuse.cursor + i];
-		samples3R[i].v =
-			(ps.x * x) +
-			(ps.y * y) +
-			ps.z * out;
-		samples3R[i].weight = ps.weight;
-	}
-	psp.cursor = (psp.elemPerGroup + psp.cursor) % (psp.elemPerGroup * psp.numGroups);
-	return samples3R;
-}
-
-Vector3R Sampler::sample_Diffuse_P(const Vector3R &normal) {
-	Vector3R dummy(uniform_01(gen), uniform_01(gen), uniform_01(gen));
-	Vector3R x = dummy.cross(normal).normalized();
-	Vector3R y = normal.cross(x);
-	PreSample &ps = presamples_Diffuse_Single.presamples[presamples_Diffuse_Single.cursor];
-	++presamples_Diffuse_Single.cursor %= presamples_Diffuse_Single.numGroups;
+	PreSample3D &ps = presamples_Diffuse_Single.presamples[presamples_Diffuse_Single.cursor];
+	++presamples_Diffuse_Single.cursor %= presamples_Diffuse_Single.elementCount;
 	return (ps.x) * x + ps.y * y + ps.z * normal;
 }
 
-Vector3R Sampler::sample_Specular_P(const Vector3R &out, const Vector3R &normal, int N) {
+Vector3R Sampler3D::sample_Specular_P(const Vector3R &out, const Vector3R &normal, int N) {
 	Vector3R dummy(uniform_01(gen), uniform_01(gen), uniform_01(gen));
 	Vector3R x = dummy.cross(normal).normalized();
 	Vector3R y = normal.cross(x);
-	PreSamplePool &psp = presamples_Specular_Single[N];
-	PreSample &ps = psp.presamples[psp.cursor];
-	++psp.cursor %= psp.numGroups;
+	PreSamplePool3D &psp = presamples_Specular_Single[N];
+	PreSample3D &ps = psp.presamples[psp.cursor];
+	++psp.cursor %= psp.elementCount;
 	return (ps.x) * x + ps.y * y + ps.z * out;
 }
 
-Sample Sampler::sample(const Vector3R &in, const Vector3R &normal, const MaterialPtr &mPtr) {
-	Sample ans;
+RaySample Sampler3D::sample(const Vector3R &in, const Vector3R &normal, const MaterialPtr &mPtr) {
+	RaySample ans;
 	bool lookFromOutside = in.dot(normal) < 0;
 	if (!mPtr->isTr()) {
 		// from outside, reflective diffuse and specular light
@@ -272,12 +166,12 @@ Sample Sampler::sample(const Vector3R &in, const Vector3R &normal, const Materia
 
 #pragma region STRATIFIED_SAMPLER
 
-std::vector<Sample2R> StratifiedSampler::sample_UnitSquare_Uniform(int sampleSize) {
+std::vector<Sample2D> StratifiedSampler::sample_UnitSquare_Uniform(int sampleSize) {
 	Real step = 1.0 / sampleSize;
-	std::vector<Sample2R> samples2R(sampleSize * sampleSize);
+	std::vector<Sample2D> samples2R(sampleSize * sampleSize);
 	for (int i = 0; i < sampleSize; i++) {
 		for (int j = 0; j < sampleSize; j++) {
-			samples2R[i * sampleSize + j] = Sample2R((i + uniform_01(gen)) * step, (j + uniform_01(gen)) * step);
+			samples2R[i * sampleSize + j] = Sample2D((i + uniform_01(gen)) * step, (j + uniform_01(gen)) * step);
 		}
 	}
 	return samples2R;
@@ -287,12 +181,12 @@ std::vector<Sample2R> StratifiedSampler::sample_UnitSquare_Uniform(int sampleSiz
 
 #pragma region LATINCUBE_SAMPLER
 
-std::vector<Sample2R> LatinCubeSampler::sample_UnitSquare_Uniform(int sampleSize) {
+std::vector<Sample2D> LatinCubeSampler::sample_UnitSquare_Uniform(int sampleSize) {
 	Real step = 1.0 / sampleSize;
-	std::vector<Sample2R> samples2R(sampleSize);
+	std::vector<Sample2D> samples2R(sampleSize);
 	std::vector<int> permutation(sampleSize);
 	for (int i = 0; i < sampleSize; i++) {
-		samples2R[i] = Sample2R(uniform_01(gen), uniform_01(gen));
+		samples2R[i] = Sample2D(uniform_01(gen), uniform_01(gen));
 		permutation[i] = i;
 	}
 	std::shuffle(permutation.begin(), permutation.end(), std::default_random_engine());

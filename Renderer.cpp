@@ -6,7 +6,7 @@
 #pragma region PIXEL_RENDERER
 Color PixelRenderer::renderPixel(int x, int y) {
 	Vector3R pixel;
-	std::vector<Sample2R> samples2R = samplerPtr->sample_UnitSquare_Uniform(sampleSize);
+	std::vector<Sample2D> samples2R = samplerPtr->sample_UnitSquare_Uniform(sampleSize);
 	int n = samples2R.size();
 	if (!cameraPtr->DOF) {
 		for (int i = 0; i < n; i++) {
@@ -14,7 +14,7 @@ Color PixelRenderer::renderPixel(int x, int y) {
 			Real offsetJ = (samples2R[i].v + y) * cameraPtr->step - cameraPtr->height / 2;
 			pixel = cameraPtr->position + cameraPtr->direction * cameraPtr->focolength + cameraPtr->right * offsetI + cameraPtr->up * offsetJ;
 			Ray ray = Ray::fromPoints(cameraPtr->position, pixel);
-			samples2R[i].value = rayTracerPtr->rayTrace_Single(ray, rayTracerPtr->depth);
+			samples2R[i].value = rayTracerPtr->rayTrace(ray, rayTracerPtr->depth);
 		}
 	}
 	else {
@@ -25,14 +25,14 @@ Color PixelRenderer::renderPixel(int x, int y) {
 			Vector3R focoPoint = (pixel - cameraPtr->position) * (cameraPtr->focalPlane / cameraPtr->focolength) + cameraPtr->position;
 			Vector3R samplePixel = pixel + (samples2R[i].u - 0.5) * cameraPtr->aperture * cameraPtr->right + (samples2R[i].v - 0.5) * cameraPtr->up * cameraPtr->aperture;
 			Ray ray = Ray::fromPoints(samplePixel, focoPoint);
-			samples2R[i].value = rayTracerPtr->rayTrace_Single(ray, rayTracerPtr->depth);
+			samples2R[i].value = rayTracerPtr->rayTrace(ray, rayTracerPtr->depth);
 		}
 	}
 	return reconstruct(samples2R);
 }
 
 // Gaussian filter
-Color PixelRenderer::reconstruct(const std::vector<Sample2R>& samples2R) {
+Color PixelRenderer::reconstruct(const std::vector<Sample2D>& samples2R) {
 	Real weightSum = 0;
 	Real r = 0, g = 0, b = 0;
 	int n = samples2R.size();
@@ -103,6 +103,8 @@ void ImageRenderer::renderImage() {
 		os.close();
 	}
 	screen.show();
+	return;
+
 	printf("Adjust your camera:\n");
 	std::string s; double d;
 	std::cin >> s >> d;
@@ -135,7 +137,7 @@ void ImageRenderer::renderImageThreading(ThreadingTask &task) {
 	// SimpleIntersectionTester sit;
 	//Kdtree sit(renderSetting->scenePtr);
 	IntersectionTester *it;
-	MonteCarloRayTracer mcrt;
+	
 	if (renderSetting->intersectiontester == "SimpleIntersectionTester") {
 		it = new SimpleIntersectionTester();
 		it->scenePtr = renderSetting->scenePtr;
@@ -145,46 +147,28 @@ void ImageRenderer::renderImageThreading(ThreadingTask &task) {
 	}
 	PixelRenderer pr;
 
-	if (renderSetting->rayTracerSampler == "Stratified") {
-		mcrt.samplerPtr = new StratifiedSampler();
-	}
-	else if (renderSetting->rayTracerSampler == "LatinCube") {
-		mcrt.samplerPtr = new LatinCubeSampler();
-	}
-	else {
-		printf("No proper sampler for ray tracer\n");
-		exit(-1);
-	}
+	RayTracer mcrt(renderSetting->scenePtr, it, new Sampler3D());
 
 	if (renderSetting->pixelSampler == "Stratified") {
 		pr.samplerPtr = new StratifiedSampler();
 	}
 	else if (renderSetting->pixelSampler == "LatinCube") {
-		pr.samplerPtr = new StratifiedSampler();
+		pr.samplerPtr = new LatinCubeSampler();
 	}
 	else {
 		printf("No proper sampler for pixel renderer\n");
 		exit(-1);
 	}
 
-	mcrt.samplerPtr->generatePreSample_Specular(renderSetting->BRDF_sampleSize, 7793, 1000);
-	mcrt.samplerPtr->generatePreSample_Diffuse(renderSetting->BRDF_sampleSize, 7379);
-	mcrt.samplerPtr->generatePreSample_Diffuse_Single(737797);
-	mcrt.samplerPtr->generatePreSample_Specular_Single(717977, 1000);
-	mcrt.samplerPtr->generatePreSample_Specular_Single(717997, 500);
 
 	mcrt.depth = renderSetting->rayTraceDepth;
-	mcrt.intersectionTesterPtr = it;
 	mcrt.sampleSize = renderSetting->BRDF_sampleSize;
 
 	pr.cameraPtr = renderSetting->cameraPtr;
 	pr.rayTracerPtr = &mcrt;
 	pr.sampleSize = renderSetting->pixelSampleSize;
 
-	it->sampler = mcrt.samplerPtr;
-/*
-	Color c = pr.renderPixel(30, 390);
-	exit(0);*/
+	it->sampler = new Sampler3D();
 
 	for (int i = task.start; i < task.end; i++) {
 		printf("line %d being rendered\n", i);
@@ -208,7 +192,7 @@ ThreadingTask::ThreadingTask(int _start, int _end, int _h) : start(_start), end(
 RenderSetting::RenderSetting(const char *filename) {
 	std::ifstream in = std::ifstream(filename);
 	std::string line;
-	scenePtr = new Scene;
+	scenePtr = new Scene(new StratifiedSampler());
 	while (std::getline(in, line)) {
 		std::vector<std::string> argv;
 		boost::split(argv, line, boost::is_any_of("\t "));

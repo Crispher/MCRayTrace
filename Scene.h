@@ -3,6 +3,8 @@
 #include "Object.h"
 #include "screen.h"
 
+class Sampler2D;
+
 struct Camera {
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	Vector3R position;
@@ -59,13 +61,14 @@ struct Camera {
 class Scene
 {
 public:
-	Scene(){};
+	Scene(Sampler2D*);
 	~Scene(){};
 
 	// scene settings
 	Color ambientLight = Colors::black;
 	MaterialPtr scatterMtl;
 	int numLightSources = 0;
+	Sampler2D *samplerPtr;
 
 	//Camera camera;
 	std::vector<Object> objects;
@@ -80,5 +83,7 @@ public:
 
 	void loadObject(const char*);
 	void loadSceneSettings(const char*);
-	void constructScene();	
+	void constructScene();
+
+	std::vector<Vector3R, Eigen::aligned_allocator<Vector3R>> getLightSourceSamples(int index, MaterialPtr &mPtr, Vector3R &normal, Real &area);
 };

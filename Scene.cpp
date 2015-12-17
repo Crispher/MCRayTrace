@@ -1,7 +1,7 @@
 #include "Scene.h"
 #include "stdafx.h"
 #include "Object.h"
-#define SHOW_PROGRESS
+#include "Sampler.h"
 #pragma region CAMERA
 
 Camera::Camera(Real px, Real py, Real pz,
@@ -41,6 +41,8 @@ void Camera::printInfo() {
 
 #pragma endregion
 
+Scene::Scene(Sampler2D *_s) : samplerPtr(_s) {}
+
 void Scene::constructScene() {
 	printf("Constructing scene... %d objects.\n", objects.size());
 	std::vector<F> faces_temp_ls, faces_temp_nls;
@@ -76,13 +78,15 @@ void Scene::constructScene() {
 		Noffset = normals.size();
 		Toffset = textures.size();
 	}
+
+	// put lightsources at the beginning of the array
 	faces.insert(faces.end(), faces_temp_ls.begin(), faces_temp_ls.end());
 	faces.insert(faces.end(), faces_temp_nls.begin(), faces_temp_nls.end());
 
 	printf("looking for scattering mtl\n");
-	scatterMtl = objects[0].materials["global_scatter"];
-	printf("%x\n", scatterMtl->flag);
+	//scatterMtl = objects[0].materials["global_scatter"];
 	printf("Scene construction complete, %d faces\n", faces.size());
+	objects.clear();
 }
 
 #pragma region SCENE_RENDER
@@ -91,6 +95,26 @@ void Scene::loadObject(const char* filename) {
 	Object object;
 	object.load(filename);
 	objects.push_back(object);
+}
+
+std::vector<Vector3R, Eigen::aligned_allocator<Vector3R>> Scene::getLightSourceSamples(int index, MaterialPtr &mPtr, Vector3R &normal, Real &area) {
+	std::vector<Sample2D> samples = samplerPtr->sampleTriangle(4);
+	std::vector<Vector3R, Eigen::aligned_allocator<Vector3R>> samplePos(samples.size());
+	for (int i = 0; i < samples.size(); i++) {
+		samplePos[i] = (1 - samples[i].u - samples[i].v) * vertices[faces[index].v[0]].v + 
+			samples[i].u * vertices[faces[index].v[1]].v + 
+			samples[i].v * vertices[faces[index].v[2]].v;
+		if ((samplePos[i][2] - 1) > Limit::Epsilon) {
+			printf("error3\n");
+			exit(0);
+		}
+	}
+	normal = normals[faces[index].vn[0]].v;
+	mPtr = faces[index].materialPtr;
+	Vector3R e1 = vertices[faces[index].v[1]].v - vertices[faces[index].v[0]].v,
+		e2 = vertices[faces[index].v[2]].v - vertices[faces[index].v[0]].v;
+	area = 0.5 * e1.cross(e2).norm();
+	return samplePos;
 }
 
 #pragma endregion

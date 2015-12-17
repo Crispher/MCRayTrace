@@ -3,10 +3,9 @@
 #include "Screen.h"
 #include "Object.h"
 #include "Scene.h"
-//#include "IntersectionTester.h"
 enum rayType {RE_D, RE_S, TR_D, TR_S};
 
-struct Sample {
+struct RaySample{
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	Vector3R v;
 	Color radiance;
@@ -14,77 +13,77 @@ struct Sample {
 	rayType type = RE_D;
 };
 
-struct Sample2R {
-	Sample2R() {}
+struct Sample2D {
+	Sample2D() {}
 	Real u, v;
-	Sample2R(Real _u, Real _v) : u(_u), v(_v) {}
+	Sample2D(Real _u, Real _v) : u(_u), v(_v) {}
 	Color value;
 };
 
-struct PreSample {
-	PreSample() {}
+struct PreSample3D {
+	PreSample3D() {}
 	Real x, y, z;
 	Real weight;
-	PreSample(Real _x, Real _y, Real _z, Real _w) :
+	PreSample3D(Real _x, Real _y, Real _z, Real _w) :
 		x(_x), y(_y), z(_z), weight(_w) {}
 };
 
-struct PreSamplePool {
-	PreSamplePool() {}
-
-	std::vector<PreSample> presamples;
-	int elemPerGroup;
-	int numGroups;
+struct PreSamplePool3D {
+	PreSamplePool3D() {}
+	std::vector<PreSample3D> presamples;
+	int elementCount;
 	int cursor;
 };
 
-class Sampler {
+class Sampler2D {
 public:
-	Scene *scenePtr;
+	Sampler2D() {}
+	~Sampler2D() {}
+	virtual std::vector<Sample2D> sample_UnitSquare_Uniform(int) = 0;
+	std::vector<Sample2D> sampleTriangle(int n);
+protected:
 	std::default_random_engine gen;
 	std::uniform_real_distribution<Real> uniform_01 = std::uniform_real_distribution<Real>(0.0, 1.0);
+};
 
-	PreSamplePool presamples_Diffuse;
-	std::map<int, PreSamplePool> presamples_Specular;
-	PreSamplePool presamples_Diffuse_Single;
-	std::map<int, PreSamplePool> presamples_Specular_Single;
+class Sampler3D {
+public:
+    Sampler3D();
+	~Sampler3D(){};
 
-	Sampler(){};
-	~Sampler(){};
+	// return a random real in [0,1);
+	Real getUniform_01();
 
 	// the only abstract function
-	virtual std::vector<Sample2R> sample_UnitSquare_Uniform(int n) = 0;
-	
-	// designed for phong model only.
-	// sample the hemisphere centered around the vector according to cosine value.
-	std::vector<Sample, Eigen::aligned_allocator<Vector3R>> sample_Diffuse(const Vector3R&, int sampleSize);
-	// sample the hemisphere centered around the vector according to the nth power of cosine value.
-	std::vector<Sample, Eigen::aligned_allocator<Vector3R>> sample_Specular(const Vector3R&, const Vector3R&, int N, int sampleSize);
+	void generatePreSamples_Diffuse(int numSamples);
+	void generatePreSamples_Specular(int numSamples, int N);
 
-	// presample utilities, _Single suffix refers to sample pools that have group size 1.
-	void generatePreSample_Diffuse(int groupSize, int numGroups);
-	void generatePreSample_Diffuse_Single(int numSamples);
-	void generatePreSample_Specular(int groupSize, int numGroups, int N);
-	void generatePreSample_Specular_Single(int numSamples, int N);
-
-	std::vector<Sample, Eigen::aligned_allocator<Vector3R>> sample_Diffuse_P(const Vector3R&, int sampleSize);
-	std::vector<Sample, Eigen::aligned_allocator<Vector3R>> sample_Specular_P(const Vector3R&, const Vector3R&, int N, int sampleSize);
 	// get a single sample
 	Vector3R sample_Diffuse_P(const Vector3R&);
 	Vector3R sample_Specular_P(const Vector3R&, const Vector3R&, int N);
 
 	// get a single sample
-	Sample sample(const Vector3R &in, const Vector3R &normal, const MaterialPtr &mPtr);
+	RaySample sample(const Vector3R &in, const Vector3R &normal, const MaterialPtr &mPtr);
+
+private:
+	std::default_random_engine gen;
+	std::uniform_real_distribution<Real> uniform_01 = std::uniform_real_distribution<Real>(0.0, 1.0);
+	PreSamplePool3D presamples_Diffuse;
+	std::map<int, PreSamplePool3D> presamples_Specular;
+	PreSamplePool3D presamples_Diffuse_Single;
+	std::map<int, PreSamplePool3D> presamples_Specular_Single;
+
+	Sample2D sampleUnitSquare_Uniform();
 };
 
-class StratifiedSampler : public Sampler {
+class StratifiedSampler : public Sampler2D {
 public:
 	StratifiedSampler() {}
-	std::vector<Sample2R> sample_UnitSquare_Uniform(int);
+	std::vector<Sample2D> sample_UnitSquare_Uniform(int);
 };
 
-class LatinCubeSampler : public Sampler {
+class LatinCubeSampler : public Sampler2D {
 public:
 	LatinCubeSampler() {}
-	std::vector<Sample2R> sample_UnitSquare_Uniform(int);
+	std::vector<Sample2D> sample_UnitSquare_Uniform(int);
 };
