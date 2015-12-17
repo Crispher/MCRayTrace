@@ -98,16 +98,12 @@ void Scene::loadObject(const char* filename) {
 }
 
 std::vector<Vector3R, Eigen::aligned_allocator<Vector3R>> Scene::getLightSourceSamples(int index, MaterialPtr &mPtr, Vector3R &normal, Real &area) {
-	std::vector<Sample2D> samples = samplerPtr->sampleTriangle(4);
+	std::vector<Sample2D> samples = samplerPtr->sampleTriangle(1);
 	std::vector<Vector3R, Eigen::aligned_allocator<Vector3R>> samplePos(samples.size());
 	for (int i = 0; i < samples.size(); i++) {
 		samplePos[i] = (1 - samples[i].u - samples[i].v) * vertices[faces[index].v[0]].v + 
 			samples[i].u * vertices[faces[index].v[1]].v + 
 			samples[i].v * vertices[faces[index].v[2]].v;
-		if ((samplePos[i][2] - 1) > Limit::Epsilon) {
-			printf("error3\n");
-			exit(0);
-		}
 	}
 	normal = normals[faces[index].vn[0]].v;
 	mPtr = faces[index].materialPtr;

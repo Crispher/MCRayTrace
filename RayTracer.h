@@ -22,7 +22,7 @@ private:
 	
 	Color RussianRoulette(const Ray&, Real factor);
 	Color integrate(const RaySample &s, const MaterialPtr &mPtr);
-	Color directLighting(const Vector3R&, const Vector3R &normal);
+	Color directLighting(const Vector3R&, const Vector3R &normal, Real &prob);
 
 	Scene *scenePtr;
 	IntersectionTester *intersectionTesterPtr;

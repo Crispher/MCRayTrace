@@ -15,10 +15,6 @@ std::vector<Sample2D> Sampler2D::sampleTriangle(int n) {
 			samples2D[i].u = 1.0 - samples2D[i].v;
 			samples2D[i].v = 1.0 - temp;
 		}
-		if (samples2D[i].v < 0 || samples2D[i].u < 0 || samples2D[i].v + samples2D[i].u > 1) {
-			printf("error\n");
-			exit(0);
-		}
 	}
 	return samples2D;
 }

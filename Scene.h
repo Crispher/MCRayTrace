@@ -70,10 +70,8 @@ public:
 	int numLightSources = 0;
 	Sampler2D *samplerPtr;
 
-	//Camera camera;
 	std::vector<Object> objects;
 
-	std::vector<F, Eigen::aligned_allocator<Vector3R>> AreaLightSources;
 	std::vector<V, Eigen::aligned_allocator<Vector3R>> vertices;
 	std::vector<VN, Eigen::aligned_allocator<Vector3R>> normals;
 	std::vector<VT, Eigen::aligned_allocator<Vector3R>> textures;
@@ -86,4 +84,8 @@ public:
 	void constructScene();
 
 	std::vector<Vector3R, Eigen::aligned_allocator<Vector3R>> getLightSourceSamples(int index, MaterialPtr &mPtr, Vector3R &normal, Real &area);
+private:
+	std::vector<Vector3R, Eigen::aligned_allocator<Vector3R>> lightSourceSamples;
+	std::vector<Real> lightSourceAreas;
+	int sampleSize;
 };

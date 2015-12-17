@@ -32,17 +32,19 @@ Color RayTracer::rayTrace(const Ray& ray, int _depth) {
 		return ans;
 	}
 	Vector3R pos = ray.source + distance * ray.direction;
-	Color ans;
+	Color ans = Colors::black;
 
 	
 	RaySample s = samplerPtr->sample(ray.direction, normal, mPtr);
+	Real prob;
+	ans += directLighting(pos, normal, prob).filter(mPtr->Kd);
 	Ray _ray(pos, s.v);
 	s.radiance = rayTrace(_ray, _depth - 1);
-	ans = integrate(s, mPtr);
+	s.radiance.scale(1 / (1 - prob));
+	ans += integrate(s, mPtr);
 	if (mPtr->isTextured()) {
 		delete mPtr;
 	}
-	ans += directLighting(pos, normal).filter(mPtr->Kd);
 	return ans;
 }
 
@@ -120,8 +122,9 @@ Color RayTracer::RussianRoulette(const Ray& ray, Real factor) {
 	}
 }
 
-Color RayTracer::directLighting(const Vector3R &pos, const Vector3R &normal) {
+Color RayTracer::directLighting(const Vector3R &pos, const Vector3R &normal, Real &prob) {
 	Color ans = Colors::black;
+	prob = 0;
 	for (int i = 0; i < scenePtr->numLightSources; i++) {
 		MaterialPtr mPtr; Vector3R ls_normal; Real filter = 0; Real area;
 		std::vector<Vector3R, Eigen::aligned_allocator<Vector3R>> samplePos = scenePtr->getLightSourceSamples(i, mPtr, ls_normal, area);
@@ -135,15 +138,12 @@ Color RayTracer::directLighting(const Vector3R &pos, const Vector3R &normal) {
 				Real r_squared = r_pos.squaredNorm();
 				//Real cos_gamma = std::max(0.0, r_pos.normalized().dot(ls_normal));
 				Real cos_gamma = abs(r_pos.normalized().dot(ls_normal));
-				if (abs(cos_gamma) > 1 + Limit::Epsilon) {
-					std::cout << cos_gamma << " ||\n " << r_pos << " ||\n " << ls_normal << std::endl;
-					exit(0);
-				}
 				
 				filter += cos_theta * cos_gamma / r_squared;
 			}
 		}
 		ans += Colors::white.filter(mPtr->Kd).scale(filter / samplePos.size() * area / Constants::Pi);
+		prob += filter * area / Constants::Pi / samplePos.size();
 	}
 	return ans;
 }
