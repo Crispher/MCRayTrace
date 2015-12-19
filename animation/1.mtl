@@ -1,0 +1,18 @@
+newmtl right
+Kd 1 0.2 0.2
+Ks 0 0 0 
+newmtl left
+Kd 0.2 1 0.2
+Ks 0 0 0
+newmtl AreaLightSource
+Kd 1 1 0.85
+Ks 0 0 0
+newmtl back
+Kd 1 1 1
+Ks 0 0 0
+newmtl floor
+Kd 1 1 1
+Ks 0 0 0
+newmtl ceiling
+Kd 1 1 1
+Ks 0 0 0
