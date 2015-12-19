@@ -147,6 +147,7 @@
     <ClInclude Include="IntersectionTester.h" />
     <ClInclude Include="Kdtree.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="physics.h" />
     <ClInclude Include="RayTracer.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Sampler.h" />
@@ -159,6 +160,7 @@
     <ClCompile Include="Kdtree.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="physics.cpp" />
     <ClCompile Include="RayTracer.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Sampler.cpp" />

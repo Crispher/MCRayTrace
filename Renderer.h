@@ -13,7 +13,8 @@ public:
     Sampler2D *samplerPtr;
 	int sampleSize;
 
-	PixelRenderer() {}
+	PixelRenderer(Camera*, RayTracer*, Sampler2D*);
+	~PixelRenderer();
 	Color renderPixel(int i, int j);
 private:
 	Color reconstruct(const std::vector<Sample2D>&);

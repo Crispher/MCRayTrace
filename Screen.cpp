@@ -27,6 +27,10 @@ void Screen::show() {
 	cv::waitKey();
 }
 
+void Screen::writeImage(const char *filename) {
+	cv::imwrite(filename, bitmap, std::vector < int > {0});
+}
+
 void Screen::coreDrawPixel(int i, int j) {
 	if (i < 0 || j < 0 || i >= width || j >= height) {
 		return;

@@ -1,6 +1,12 @@
 #include "IntersectionTester.h"
 
+
+
 #pragma region BASE_INTERSECTION_TESTER
+
+IntersectionTester::~IntersectionTester() {
+	delete sampler;
+}
 
 void IntersectionTester::basicIntersectionTest(const Ray &ray, const F& face) {
 	const Vector3R &p0 = scenePtr->vertices[face.v[0]].v, &p1 = scenePtr->vertices[face.v[1]].v, &p2 = scenePtr->vertices[face.v[2]].v;
@@ -146,6 +152,11 @@ void IntersectionTester::clearCache() {
 #pragma endregion
 
 #pragma region SIMPLE_TESTER
+
+SimpleIntersectionTester::SimpleIntersectionTester(Scene * _scenePtr) {
+	scenePtr = _scenePtr;
+	sampler = new Sampler3D();
+}
 
 void SimpleIntersectionTester::intersectionTest(const Ray &ray, bool &intersected, Real &distance, Vector3R &normal, MaterialPtr &mPtr) {
 	clearCache();

@@ -1,9 +1,22 @@
 #include "Renderer.h"
 #include "stdafx.h"
 #include "Kdtree.h"
+#include "physics.h"
 #define SHOW_PROGRESS
 
 #pragma region PIXEL_RENDERER
+
+PixelRenderer::PixelRenderer(Camera* _c, RayTracer* _r, Sampler2D* _s) :
+cameraPtr(_c), rayTracerPtr(_r), samplerPtr(_s) {
+
+}
+
+PixelRenderer::~PixelRenderer() {
+	//delete cameraPtr;
+	//delete rayTracerPtr;
+	//delete samplerPtr;
+}
+
 Color PixelRenderer::renderPixel(int x, int y) {
 	Vector3R pixel;
 	std::vector<Sample2D> samples2R = samplerPtr->sample_UnitSquare_Uniform(sampleSize);
@@ -55,54 +68,63 @@ void ImageRenderer::renderImage() {
 		fromRaw(renderSetting->rawFile.c_str());
 		return;
 	}
-
+	int series_no = 0;
 	int w = renderSetting->imageWidth;
 	int h = renderSetting->imageHeight;
 	Screen screen(w, h);
-
-	// unified procedure. creating tasks for threads
-	std::vector<ThreadingTask> tasks(renderSetting->threading);
-	int dw = w / renderSetting->threading;
-	int i = 0;
-	for (; i < renderSetting->threading - 1; i++) {
-		tasks[i] = ThreadingTask(i * dw, (i + 1) * dw, h);
-	}
-	tasks[i] = ThreadingTask(i * dw, w, h);
-
-	// create and run threads
-	std::vector<std::thread> threads(renderSetting->threading);
-	for (i = 0; i < renderSetting->threading; i++) {
-		threads[i] = std::thread(&ImageRenderer::renderImageThreading, this, std::ref(tasks[i]));
-	}
-
-	// join
-	for (i = 0; i < renderSetting->threading; i++) {
-		threads[i].join();
-	}
-
-	// merge result
-	for (i = 0; i < renderSetting->threading; i++) {
-		for (int a = tasks[i].start; a < tasks[i].end; a++) {
-			for (int j = 0; j < h; j++) {
-				screen.color = tasks[i].bitmap[a - tasks[i].start][j].filter(renderSetting->Er, renderSetting->Eg, renderSetting->Eb);
-				screen.drawPixel(a, j);
-			}
+	while (true) {
+		// unified procedure. creating tasks for threads
+		std::vector<ThreadingTask> tasks(renderSetting->threading);
+		int dw = w / renderSetting->threading;
+		int i = 0;
+		for (; i < renderSetting->threading - 1; i++) {
+			tasks[i] = ThreadingTask(i * dw, (i + 1) * dw, h);
 		}
-	}
-	if (renderSetting->writeRaw) {
-		std::ofstream os(renderSetting->rawFile);
-		os << renderSetting->imageWidth << ' ' << renderSetting->imageHeight << std::endl;
+		tasks[i] = ThreadingTask(i * dw, w, h);
+
+		// create and run threads
+		std::vector<std::thread> threads(renderSetting->threading);
+		for (i = 0; i < renderSetting->threading; i++) {
+			threads[i] = std::thread(&ImageRenderer::renderImageThreading, this, std::ref(tasks[i]));
+		}
+
+		// join
+		for (i = 0; i < renderSetting->threading; i++) {
+			threads[i].join();
+		}
+
+		// merge result
 		for (i = 0; i < renderSetting->threading; i++) {
 			for (int a = tasks[i].start; a < tasks[i].end; a++) {
 				for (int j = 0; j < h; j++) {
-					Color color = tasks[i].bitmap[a - tasks[i].start][j];
-					os << color.red() << ' ' << color.green() << ' ' << color.blue() << std::endl;
+					screen.color = tasks[i].bitmap[a - tasks[i].start][j].filter(renderSetting->Er, renderSetting->Eg, renderSetting->Eb);
+					screen.drawPixel(a, j);
 				}
 			}
 		}
-		os.close();
+		if (renderSetting->writeRaw) {
+			std::ofstream os(renderSetting->rawFile);
+			os << renderSetting->imageWidth << ' ' << renderSetting->imageHeight << std::endl;
+			for (i = 0; i < renderSetting->threading; i++) {
+				for (int a = tasks[i].start; a < tasks[i].end; a++) {
+					for (int j = 0; j < h; j++) {
+						Color color = tasks[i].bitmap[a - tasks[i].start][j];
+						os << color.red() << ' ' << color.green() << ' ' << color.blue() << std::endl;
+					}
+				}
+			}
+			os.close();
+		}
+		//screen.show();
+		std::stringstream ss;
+		std::string file;
+		ss << series_no;
+		ss >> file;
+		file = "animation/" + file + ".png";
+		screen.writeImage(file.c_str());
+		renderSetting->scenePtr->physics->step(0.02);
+		series_no++;
 	}
-	screen.show();
 	return;
 
 	printf("Adjust your camera:\n");
@@ -134,44 +156,35 @@ void ImageRenderer::renderImage() {
 
 
 void ImageRenderer::renderImageThreading(ThreadingTask &task) {
-	// SimpleIntersectionTester sit;
-	//Kdtree sit(renderSetting->scenePtr);
 	IntersectionTester *it;
 	
 	if (renderSetting->intersectiontester == "SimpleIntersectionTester") {
-		it = new SimpleIntersectionTester();
-		it->scenePtr = renderSetting->scenePtr;
+		it = new SimpleIntersectionTester(renderSetting->scenePtr);
 	}
 	else if (renderSetting->intersectiontester == "KdtreeIntersectionTester") {
 		it = new Kdtree(renderSetting->scenePtr);
 	}
-	PixelRenderer pr;
+	
+	RayTracer mcrt(renderSetting->scenePtr, it, renderSetting->rayTraceDepth);
 
-	RayTracer mcrt(renderSetting->scenePtr, it, new Sampler3D());
-
+	Sampler2D *samplerPtr;
 	if (renderSetting->pixelSampler == "Stratified") {
-		pr.samplerPtr = new StratifiedSampler();
+		samplerPtr = new StratifiedSampler();
 	}
 	else if (renderSetting->pixelSampler == "LatinCube") {
-		pr.samplerPtr = new LatinCubeSampler();
+		samplerPtr = new LatinCubeSampler();
 	}
 	else {
 		printf("No proper sampler for pixel renderer\n");
 		exit(-1);
 	}
-
-
-	mcrt.depth = renderSetting->rayTraceDepth;
-	mcrt.sampleSize = renderSetting->BRDF_sampleSize;
-
-	pr.cameraPtr = renderSetting->cameraPtr;
-	pr.rayTracerPtr = &mcrt;
+	
+	PixelRenderer pr(renderSetting->cameraPtr, &mcrt, samplerPtr);
 	pr.sampleSize = renderSetting->pixelSampleSize;
 
-	it->sampler = new Sampler3D();
-
 	for (int i = task.start; i < task.end; i++) {
-		printf("line %d being rendered\n", i);
+		if (i % 10 == 0)
+			printf("line %d being rendered\n", i);
 		for (int j = 0; j < task.h; j++) {
 			Color out = pr.renderPixel(i, j);
 			task.bitmap[i - task.start][j] = out;
@@ -193,6 +206,7 @@ RenderSetting::RenderSetting(const char *filename) {
 	std::ifstream in = std::ifstream(filename);
 	std::string line;
 	scenePtr = new Scene(new StratifiedSampler());
+	
 	while (std::getline(in, line)) {
 		std::vector<std::string> argv;
 		boost::split(argv, line, boost::is_any_of("\t "));
@@ -315,4 +329,5 @@ RenderSetting::RenderSetting(const char *filename) {
 		}
 	}
 	scenePtr->constructScene();
+	scenePtr->physics = new Physics(scenePtr);
 }

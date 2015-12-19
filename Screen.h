@@ -107,6 +107,7 @@ public:
 	void drawPoint(Point p);
 	void clear(Color);
 	void show();
+	void writeImage(const char *filename);
 
 	void drawLine(Point, Point);
 	void drawPolygon(const std::vector<Point> &);

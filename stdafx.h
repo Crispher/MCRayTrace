@@ -10,6 +10,7 @@
 #include <random>
 #include <thread>
 #include <functional>
+#include <sstream>
 
 #include "boost\algorithm\string.hpp"
 #include "boost\lexical_cast.hpp"

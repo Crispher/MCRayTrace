@@ -4,6 +4,7 @@
 #include "screen.h"
 
 class Sampler2D;
+class Physics;
 
 struct Camera {
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -78,6 +79,8 @@ public:
 	std::vector<F, Eigen::aligned_allocator<Vector3R>> faces;
 	std::vector<Sphere, Eigen::aligned_allocator<Vector3R>> spheres;
 	std::map<std::string, MaterialPtr> materials;
+
+	Physics *physics;
 
 	void loadObject(const char*);
 	void loadSceneSettings(const char*);

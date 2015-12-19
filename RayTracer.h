@@ -7,11 +7,11 @@
 
 class RayTracer {
 public:
-	RayTracer(Scene*, IntersectionTester*, Sampler3D*);
+	RayTracer(Scene*, IntersectionTester*, int _depth);
+	~RayTracer();
 	Color rayTrace(const Ray&, int _depth);
 
 	int depth;
-	int sampleSize;
 
 private:
 	Color integrateDiffuse_Reflect(const std::vector<RaySample, Eigen::aligned_allocator<Vector3R>>&, const MaterialPtr &mPtr) const;

@@ -1,7 +1,13 @@
 #include "RayTracer.h"
 //#define DEBUG_INFO
-RayTracer::RayTracer(Scene *_s, IntersectionTester *_i, Sampler3D *_sm) :
-scenePtr(_s), intersectionTesterPtr(_i), samplerPtr(_sm) {
+RayTracer::RayTracer(Scene *_s, IntersectionTester *_i, int _depth) :
+scenePtr(_s), intersectionTesterPtr(_i), depth(_depth) {
+	samplerPtr = new Sampler3D();
+}
+
+RayTracer::~RayTracer() {
+	delete samplerPtr;
+	delete intersectionTesterPtr;
 }
 
 Color RayTracer::rayTrace(const Ray& ray, int _depth) {

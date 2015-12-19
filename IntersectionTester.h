@@ -17,7 +17,7 @@ public:
 	std::exponential_distribution<Real> exponential_scatter = std::exponential_distribution<Real>(5e-1);
 
 	IntersectionTester() {};
-	~IntersectionTester() {};
+	~IntersectionTester();
 
 	void basicIntersectionTest(const Ray &ray, const F&);
 	void basicIntersectionTest(const Ray &ray, const Sphere&);
@@ -37,6 +37,6 @@ protected:
 
 class SimpleIntersectionTester : public IntersectionTester {
 public:
-	SimpleIntersectionTester() {}
+	SimpleIntersectionTester(Scene *scenePtr);
 	void intersectionTest(const Ray&, bool &intersected, Real &distance, Vector3R &normal, MaterialPtr &mPtr);
 };
