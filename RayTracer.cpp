@@ -6,8 +6,8 @@ scenePtr(_s), intersectionTesterPtr(_i), depth(_depth) {
 }
 
 RayTracer::~RayTracer() {
-	delete samplerPtr;
-	delete intersectionTesterPtr;
+	//delete samplerPtr;
+	//delete intersectionTesterPtr;
 }
 
 Color RayTracer::rayTrace(const Ray& ray, int _depth) {
@@ -25,6 +25,7 @@ Color RayTracer::rayTrace(const Ray& ray, int _depth) {
 	MaterialPtr mPtr = nullptr;
 	intersectionTesterPtr->intersectionTest(ray, intersected, distance, normal, mPtr);
 	if (!intersected) {
+		//return Colors::white.scale(ray.direction[2]);
 		return intersectionTesterPtr->scenePtr->ambientLight;
 	}
 

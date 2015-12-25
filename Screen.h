@@ -22,7 +22,7 @@ public:
 			std::min((int)r, 255));
 	}
 
-	Color scale(Real k) {
+	Color scale(Real k) const {
 		return Color(k*r, k*g, k*b);
 	}
 	static Color fromHSV(Real, Real, Real);

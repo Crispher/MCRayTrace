@@ -169,19 +169,8 @@ void Kdtree::test(KdtreeNode *cursor) {
 void Kdtree::intersectionTest(const Ray& ray,
 	bool& intersected, Real& distance, Vector3R& normal, MaterialPtr &mPtr) {
 	debug_testcount = 0;
-#ifdef LOG
-	printf("intersection test: ray(%f, %f, %f -> %f, %f, %f)\n", ray.source[0], ray.source[1], ray.source[2],
-		ray.direction[0], ray.direction[1], ray.direction[2]);
-#endif
-	// todo;
 	clearCache();
 	intersectionTest(root, ray);
-#ifdef LOG
-	//printf(" :%d: ", debug_testcount);
-	printf("test result %d\n", cacheIntersected);
-	Vector3R pos = ray.source + cacheDistance * ray.direction;
-	printf("intersection at (%f, %f, %f), distance = %f\n", pos[0], pos[1], pos[2], cacheDistance);
-#endif
 	intersected = cacheIntersected;
 	distance = cacheDistance;
 	normal = cacheNormal;
@@ -200,25 +189,14 @@ void Kdtree::intersectionTest(const Ray& ray,
 
 bool Kdtree::intersectionTest(KdtreeNode *cursor, const Ray& ray)  {
 	// if ray do not intersect the bounding box, return false directly.
-#ifdef LOG
-	printf("\n\n KDNODE: intersection test: ray(%f, %f, %f -> %f, %f, %f)\n", ray.source[0], ray.source[1], ray.source[2],
-		ray.direction[0], ray.direction[1], ray.direction[2]);
-	cursor->boundingBox.printInfo();
-#endif
 	if (!cursor->boundingBox.intersectRay(ray)) {
 		return false;
 	}
 
 	if (cursor->isLeaf()) {
-#ifdef LOG
-		printf("leaf: ");
-#endif
 		for (int f : cursor->facesInside) {
 			basicIntersectionTest(ray, scenePtr->faces[f]);
 			debug_testcount++;
-#ifdef LOG
-			printf("%d ", f);
-#endif
 		}
 	}
 	
@@ -232,19 +210,23 @@ bool Kdtree::intersectionTest(KdtreeNode *cursor, const Ray& ray)  {
 			return true;
 		}
 		else {
-			// bounding box check should be put here. todo // needless ?
 			intersectionTest(far, ray);
 		}		
 	}
 
 	if (cacheIntersected) {
 		Vector3R intersection = ray.source + cacheDistance * ray.direction;
-		// cursor->boundingBox.printInfo();
 		if (cursor->boundingBox.contain(intersection)) {
-			//printf(" |A| ");
 			return true;
 		}
 	}
 	return false;
 }
+
+bool Kdtree::visible(const Vector3R &pos1, const Vector3R &pos2) {
+	// todo;
+
+	return false;
+}
+
 #pragma endregion

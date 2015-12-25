@@ -68,7 +68,6 @@ void ImageRenderer::renderImage() {
 		fromRaw(renderSetting->rawFile.c_str());
 		return;
 	}
-	int series_no = 0;
 	int w = renderSetting->imageWidth;
 	int h = renderSetting->imageHeight;
 	Screen screen(w, h);
@@ -115,15 +114,8 @@ void ImageRenderer::renderImage() {
 			}
 			os.close();
 		}
-		//screen.show();
-		std::stringstream ss;
-		std::string file;
-		ss << series_no;
-		ss >> file;
-		file = "animation/" + file + ".png";
-		screen.writeImage(file.c_str());
-		renderSetting->scenePtr->physics->step(0.02);
-		series_no++;
+		screen.show();
+		return;
 	}
 	return;
 
