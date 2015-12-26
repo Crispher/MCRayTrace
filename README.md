@@ -8,10 +8,7 @@ A Monte Carlo ray tracer.
     - kd-tree accelerator
     - bump mapping
     - texture mapping
-  - todo:
-    - sampling the lightsource at each reflection
-    - handle more general brdf surfaces
-    - hemisphere lightsource
+    - a tiny physic engine framework with partial implementation
     - ...
   - dependency and environment configuration:
     - this project builds a ray tracer from scratch however 
@@ -19,12 +16,12 @@ A Monte Carlo ray tracer.
       - 2) Eigen library are used to perform linear algebra calculations; 
       - 3) some utilities in boost are also used.
     - IDE: visual studio 2013, platform: windows.
-  - Images (more in the image/* folder)
-    Texture mapping / depth of field
+  - Sample pictures (more in the images/* folder)
+    - Texture mapping / depth of field
     ![alt tag](https://github.com/Crispher/MCRayTrace/blob/master/images/Image8.png)
-    Demonstration of sampling technique: cornell box rendered with 10,000 samples per pixel
+    - Demonstration of sampling technique: cornell box rendered with 10,000 samples per pixel
     ![alt tag](https://github.com/Crispher/MCRayTrace/blob/master/images/Image62.png)
-    Rendering of special surface interaction and total internal reflection
+    - Rendering of anisotropic surface interaction and total internal reflection
     ![alt tag](https://github.com/Crispher/MCRayTrace/blob/master/images/Image66.png)
- - Acknowledgement
+ - Acknowledgement: \\
     Thanks to Wang Cunguang, who provided the 3D model of our school gate.
