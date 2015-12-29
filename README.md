@@ -25,7 +25,6 @@ A Monte Carlo ray tracer.
     - Rendering of anisotropic surface interaction and total internal reflection
     ![alt tag](https://github.com/Crispher/MCRayTrace/blob/master/images/Image25.png)
     ![alt tag](https://github.com/Crispher/MCRayTrace/blob/master/images/Image66.png)
-    - Sample video of physics engine
-    ![alt tag](https://github.com/Crispher/MCRayTrace/blob/master/animation/animation.avi)
+    - Sample video of physics engine: [link](https://github.com/Crispher/MCRayTrace/blob/master/animation/animation.avi)
  - Acknowledgement: \\
     Thanks to Wang Cunguang, who provided the 3D model of our school gate.
