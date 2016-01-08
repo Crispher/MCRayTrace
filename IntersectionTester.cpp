@@ -111,7 +111,7 @@ void IntersectionTester::basicIntersectionTest(const Ray &ray, const Sphere& sph
 	cacheMPtr = sphere.materialPtr;
 }
 
-bool IntersectionTester::visible(const Vector3R &pos1, const Vector3R &pos2) {
+bool SimpleIntersectionTester::visible(const Vector3R &pos1, const Vector3R &pos2) {
 	visibilityTestMode = true;
 	Ray ray = Ray::fromPoints(pos1, pos2);
 	Real d = (pos2 - pos1).norm();

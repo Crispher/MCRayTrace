@@ -1,22 +1,31 @@
 #include "RayTracer.h"
-//#define DEBUG_INFO
-RayTracer::RayTracer(Scene *_s, IntersectionTester *_i, int _depth) :
-scenePtr(_s), intersectionTesterPtr(_i), depth(_depth) {
+
+RayTracer::RayTracer(Scene *_s, std::string _i, int _depth) :
+scenePtr(_s), depth(_depth) {
+	if (_i == "SimpleIntersectionTester") {
+		intersectionTesterPtr = new SimpleIntersectionTester(scenePtr);
+	}
+	else if (_i == "KdtreeIntersectionTester") {
+		intersectionTesterPtr = new Kdtree(scenePtr);
+	}
+	else {
+		printf("Ray tracer initialization failed: no proper intersection tester specified.\n");
+		exit(0);
+	}
 	samplerPtr = new Sampler3D();
 }
 
 RayTracer::~RayTracer() {
-	//delete samplerPtr;
-	//delete intersectionTesterPtr;
+	delete samplerPtr;
+	delete intersectionTesterPtr;
 }
 
+Color RayTracer::rayTrace(const Ray& ray) {
+	return rayTrace(ray, depth);
+}
 Color RayTracer::rayTrace(const Ray& ray, int _depth) {
 	if (_depth == 0) {
-		/*if (intersectionTesterPtr->visible(Vector3R(0, 0, 0), ray.source)) {
-			return Colors::white;
-		}*/
 		return Colors::black;
-		//return RussianRoulette(ray, 0.5);
 	}
 
 	bool intersected = false;
@@ -25,13 +34,12 @@ Color RayTracer::rayTrace(const Ray& ray, int _depth) {
 	MaterialPtr mPtr = nullptr;
 	intersectionTesterPtr->intersectionTest(ray, intersected, distance, normal, mPtr);
 	if (!intersected) {
-		//return Colors::white.scale(ray.direction[2]);
-		return intersectionTesterPtr->scenePtr->ambientLight;
+		return scenePtr->ambientLight;
 	}
 
 	if (mPtr->isLightSource()) {
-		if (_depth < depth)
-			return Colors::black;
+		/*if (_depth < depth)
+			return Colors::black;*/
 		Color ans = Colors::white.filter(mPtr->Kd);
 		if (mPtr->isTextured()) {
 			delete mPtr;
@@ -43,64 +51,16 @@ Color RayTracer::rayTrace(const Ray& ray, int _depth) {
 
 	
 	RaySample s = samplerPtr->sample(ray.direction, normal, mPtr);
-	Real prob;
-	ans += directLighting(pos, normal, prob).filter(mPtr->Kd);
+	/*Real prob;
+	ans += directLighting(pos, normal, prob).filter(mPtr->Kd);*/
 	Ray _ray(pos, s.v);
 	s.radiance = rayTrace(_ray, _depth - 1);
-	s.radiance.scale(1 / (1 - prob));
+	//s.radiance.scale(1 / (1 - prob));
 	ans += integrate(s, mPtr);
 	if (mPtr->isTextured()) {
 		delete mPtr;
 	}
 	return ans;
-}
-
-Color RayTracer::integrateDiffuse_Reflect(const std::vector<RaySample, Eigen::aligned_allocator<Vector3R>> &samples, 
-	const MaterialPtr &mPtr) const {
-	Real r = 0, g = 0, b = 0;
-	int n = samples.size();
-	for (int i = 0; i < n; i++) {
-		r += samples[i].radiance.red() / samples[i].weight;
-		g += samples[i].radiance.green() / samples[i].weight;
-		b += samples[i].radiance.blue() / samples[i].weight;
-	}
-	return Color(r * mPtr->Kd[0] / n, g * mPtr->Kd[1] / n, b * mPtr->Kd[2] / n);
-}
-
-Color RayTracer::integrateSpecular_Reflect(const std::vector<RaySample, Eigen::aligned_allocator<Vector3R>> &samples, 
-	const MaterialPtr &mPtr) const {
-	Real r = 0, g = 0, b = 0;
-	int n = samples.size();
-	for (int i = 0; i < n; i++) {
-		r += samples[i].radiance.red() / samples[i].weight;
-		g += samples[i].radiance.green() / samples[i].weight;
-		b += samples[i].radiance.blue() / samples[i].weight;
-	}
-	return Color(r * mPtr->Ks[0] / n, g * mPtr->Ks[1] / n, b * mPtr->Ks[2] / n);
-}
-
-Color RayTracer::integrateDiffuse_Refract(const std::vector<RaySample, Eigen::aligned_allocator<Vector3R>>& samples, 
-	const MaterialPtr &mPtr) const {
-	Real r = 0, g = 0, b = 0;
-	int n = samples.size();
-	for (int i = 0; i < n; i++) {
-		r += samples[i].radiance.red() / samples[i].weight;
-		g += samples[i].radiance.green() / samples[i].weight;
-		b += samples[i].radiance.blue() / samples[i].weight;
-	}
-	return Color(r * mPtr->Td[0] / n, g * mPtr->Td[1] / n, b * mPtr->Td[2] / n);
-}
-
-Color RayTracer::integrateSpecular_Refract(const std::vector<RaySample, Eigen::aligned_allocator<Vector3R>>& samples, 
-	const MaterialPtr &mPtr) const {
-	Real r = 0, g = 0, b = 0;
-	int n = samples.size();
-	for (int i = 0; i < n; i++) {
-		r += samples[i].radiance.red() / samples[i].weight;
-		g += samples[i].radiance.green() / samples[i].weight;
-		b += samples[i].radiance.blue() / samples[i].weight;
-	}
-	return Color(r * mPtr->Ts[0] / n, g * mPtr->Ts[1] / n, b * mPtr->Ts[2] / n);
 }
 
 Color RayTracer::integrate(const RaySample&s, const MaterialPtr &mPtr) {

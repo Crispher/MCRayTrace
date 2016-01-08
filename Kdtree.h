@@ -46,7 +46,7 @@ public:
 	~Kdtree() {};
 	void intersectionTest(const Ray& ray, bool &intersected, Real &distance, Vector3R &normal, MaterialPtr &mPtr);
 	bool intersectionTest(KdtreeNode *cursor, const Ray& ray);
-
+	bool visible(const Vector3R &pos1, const Vector3R &pos2);
 	void test(KdtreeNode *cursor);
 };
 

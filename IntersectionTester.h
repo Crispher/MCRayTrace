@@ -5,23 +5,25 @@
 
 class IntersectionTester
 {
-public:
+protected:
 	Scene *scenePtr;
-    Sampler3D *sampler;
-
-	bool scatterMode = true;
+	Sampler3D *sampler;
 	bool visibilityTestMode = false;
-	
 	std::default_random_engine gen;
+
 	std::uniform_real_distribution<Real> uniform_01 = std::uniform_real_distribution<Real>(0.0, 1.0);
 	std::exponential_distribution<Real> exponential_scatter = std::exponential_distribution<Real>(5e-1);
 
+
+public:
+	bool scatterMode = true;
+	
 	IntersectionTester() {};
 	~IntersectionTester();
 
 	void basicIntersectionTest(const Ray &ray, const F&);
 	void basicIntersectionTest(const Ray &ray, const Sphere&);
-	bool visible(const Vector3R &pos1, const Vector3R &pos2);
+	virtual bool visible(const Vector3R &pos1, const Vector3R &pos2) = 0;
 
 	virtual void intersectionTest(const Ray&, bool &intersected, Real &distance, Vector3R &normal, MaterialPtr &mPtr) = 0;
 
@@ -39,4 +41,5 @@ class SimpleIntersectionTester : public IntersectionTester {
 public:
 	SimpleIntersectionTester(Scene *scenePtr);
 	void intersectionTest(const Ray&, bool &intersected, Real &distance, Vector3R &normal, MaterialPtr &mPtr);
+	bool visible(const Vector3R &pos1, const Vector3R &pos2);
 };

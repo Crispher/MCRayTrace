@@ -8,16 +8,17 @@
 
 class PixelRenderer {
 public:
-	Camera *cameraPtr;
-	RayTracer *rayTracerPtr;
-    Sampler2D *samplerPtr;
-	int sampleSize;
-
-	PixelRenderer(Camera*, RayTracer*, Sampler2D*);
+	PixelRenderer(Camera*, RayTracer*, std::string sampler, int sampleSize);
 	~PixelRenderer();
 	Color renderPixel(int i, int j);
+
 private:
 	Color reconstruct(const std::vector<Sample2D>&);
+
+	Camera *cameraPtr;
+	RayTracer *rayTracerPtr;
+	Sampler2D *samplerPtr;
+	int sampleSize;
 };
 
 class RenderSetting {
@@ -30,7 +31,6 @@ public:
 	std::string pixelSampler;
 
 	int rayTraceDepth;
-	int BRDF_sampleSize;
 	int pixelSampleSize;
 	int threading = 1;
 

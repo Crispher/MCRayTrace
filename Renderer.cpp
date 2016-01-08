@@ -6,15 +6,24 @@
 
 #pragma region PIXEL_RENDERER
 
-PixelRenderer::PixelRenderer(Camera* _c, RayTracer* _r, Sampler2D* _s) :
-cameraPtr(_c), rayTracerPtr(_r), samplerPtr(_s) {
+PixelRenderer::PixelRenderer(Camera* _c, RayTracer* _r, std::string _s, int _sampleSize) :
+cameraPtr(_c), rayTracerPtr(_r), sampleSize(_sampleSize) {
+
+	if (_s == "Stratified") {
+		samplerPtr = new StratifiedSampler();
+	}
+	else if (_s == "LatinCube") {
+		samplerPtr = new LatinCubeSampler();
+	}
+	else {
+		printf("No proper sampler for pixel renderer\n");
+		exit(-1);
+	}
 
 }
 
 PixelRenderer::~PixelRenderer() {
-	//delete cameraPtr;
-	//delete rayTracerPtr;
-	//delete samplerPtr;
+	delete samplerPtr;
 }
 
 Color PixelRenderer::renderPixel(int x, int y) {
@@ -27,7 +36,7 @@ Color PixelRenderer::renderPixel(int x, int y) {
 			Real offsetJ = (samples2R[i].v + y) * cameraPtr->step - cameraPtr->height / 2;
 			pixel = cameraPtr->position + cameraPtr->direction * cameraPtr->focolength + cameraPtr->right * offsetI + cameraPtr->up * offsetJ;
 			Ray ray = Ray::fromPoints(cameraPtr->position, pixel);
-			samples2R[i].value = rayTracerPtr->rayTrace(ray, rayTracerPtr->depth);
+			samples2R[i].value = rayTracerPtr->rayTrace(ray);
 		}
 	}
 	else {
@@ -38,7 +47,7 @@ Color PixelRenderer::renderPixel(int x, int y) {
 			Vector3R focoPoint = (pixel - cameraPtr->position) * (cameraPtr->focalPlane / cameraPtr->focolength) + cameraPtr->position;
 			Vector3R samplePixel = pixel + (samples2R[i].u - 0.5) * cameraPtr->aperture * cameraPtr->right + (samples2R[i].v - 0.5) * cameraPtr->up * cameraPtr->aperture;
 			Ray ray = Ray::fromPoints(samplePixel, focoPoint);
-			samples2R[i].value = rayTracerPtr->rayTrace(ray, rayTracerPtr->depth);
+			samples2R[i].value = rayTracerPtr->rayTrace(ray);
 		}
 	}
 	return reconstruct(samples2R);
@@ -150,29 +159,8 @@ void ImageRenderer::renderImage() {
 void ImageRenderer::renderImageThreading(ThreadingTask &task) {
 	IntersectionTester *it;
 	
-	if (renderSetting->intersectiontester == "SimpleIntersectionTester") {
-		it = new SimpleIntersectionTester(renderSetting->scenePtr);
-	}
-	else if (renderSetting->intersectiontester == "KdtreeIntersectionTester") {
-		it = new Kdtree(renderSetting->scenePtr);
-	}
-	
-	RayTracer mcrt(renderSetting->scenePtr, it, renderSetting->rayTraceDepth);
-
-	Sampler2D *samplerPtr;
-	if (renderSetting->pixelSampler == "Stratified") {
-		samplerPtr = new StratifiedSampler();
-	}
-	else if (renderSetting->pixelSampler == "LatinCube") {
-		samplerPtr = new LatinCubeSampler();
-	}
-	else {
-		printf("No proper sampler for pixel renderer\n");
-		exit(-1);
-	}
-	
-	PixelRenderer pr(renderSetting->cameraPtr, &mcrt, samplerPtr);
-	pr.sampleSize = renderSetting->pixelSampleSize;
+	RayTracer mcrt(renderSetting->scenePtr, renderSetting->intersectiontester, renderSetting->rayTraceDepth);
+	PixelRenderer pr(renderSetting->cameraPtr, &mcrt, renderSetting->pixelSampler, renderSetting->pixelSampleSize);
 
 	for (int i = task.start; i < task.end; i++) {
 		if (i % 10 == 0)
@@ -288,7 +276,6 @@ RenderSetting::RenderSetting(const char *filename) {
 		if (argv[0] == "rayTraceSampler") {
 			rayTracerSampler = argv[1];
 			rayTraceDepth = boost::lexical_cast<int>(argv[2]);
-			BRDF_sampleSize = boost::lexical_cast<int>(argv[3]);
 			continue;
 		}
 		if (argv[0] == "threading") {
@@ -321,5 +308,4 @@ RenderSetting::RenderSetting(const char *filename) {
 		}
 	}
 	scenePtr->constructScene();
-	scenePtr->physics = new Physics(scenePtr);
 }
