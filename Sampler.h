@@ -3,14 +3,15 @@
 #include "Screen.h"
 #include "Object.h"
 #include "Scene.h"
-enum rayType {RE_D, RE_S, TR_D, TR_S};
+
+enum RayType { CAMERA, DIFFUSE, SPECULAR_REFLECT, SPECULAR_REFRACT_IN, SPECULAR_REFRACT_OUT, SCATTER};
 
 struct RaySample{
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	Vector3R v;
 	Color radiance;
 	Real weight;
-	rayType type = RE_D;
+	RayType type = DIFFUSE;
 };
 
 struct Sample2D {

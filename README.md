@@ -6,10 +6,17 @@ A Monte Carlo ray tracer.
     - triangles and spheres
     - two samplers: stratified and latincube
     - kd-tree accelerator
+<<<<<<< HEAD
     - bump mapping, texture mapping
     - importance sampling, direct lighting
     - a tiny physics engine framework with partial implementation
     - scattering media
+=======
+    - bump mapping
+    - texture mapping
+    - a tiny physic engine framework with partial implementation
+    - mesh simplification
+>>>>>>> mesh simplification
     - ...
   - dependency and environment configuration:
     - this project builds a ray tracer from scratch however 

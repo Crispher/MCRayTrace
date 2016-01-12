@@ -93,12 +93,12 @@ public:
 	unsigned short flag = 0; // 1 rd | 2 rs | 4 tr | 8 td | 16 ts | 32 texture | 64 brdf | channel: 128 bump | 256 Kd | Ks | Td | Ts | islightsource | fresnel
 	inline void setRd() { flag |= 1; }
 	inline void setRs() { flag |= (1 << 1); }
-	inline void setTr() { flag |= 4; }
-	inline void setTd() { flag |= 8; }
-	inline void setTs() { flag |= 16; }
-	inline void setTexture() { flag |= 32; }
-	inline void setBRDF() { flag |= 64; }
-	inline void setBump() { flag |= 128; }
+	inline void setTr() { flag |= 1 << 2; }
+	inline void setTd() { flag |= 1 << 3; }
+	inline void setTs() { flag |= 1 << 4; }
+	inline void setTexture() { flag |= 1 << 5; }
+	inline void setBRDF() { flag |= 1 << 6; }
+	inline void setBump() { flag |= 1 << 7; }
 	inline void setTextureKd() { flag |= 256; }
 	inline void setTextureKs() { flag |= 512; }
 	inline void setTextureTd() { flag |= (1 << 10); }
@@ -142,6 +142,7 @@ public:
 	void rotate(int axis, Real angle);
 	void relocate(Real minx, Real minY, Real minz);
 	void computeNormals(bool interpolation);
+	void meshSimplify(int);
 	void scale(Real ratio);
 
 	// material information:

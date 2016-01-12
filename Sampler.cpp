@@ -91,17 +91,24 @@ Vector3R Sampler3D::sample_Specular_P(const Vector3R &out, const Vector3R &norma
 RaySample Sampler3D::sample(const Vector3R &in, const Vector3R &normal, const MaterialPtr &mPtr) {
 	RaySample ans;
 	bool lookFromOutside = in.dot(normal) < 0;
+	if (mPtr->isScatter()) {
+		ans.type = SCATTER;
+		ans.weight = 1;
+		ans.v = sample_Diffuse_P(normal);
+		return ans;
+	}
+
 	if (!mPtr->isTr()) {
 		// from outside, reflective diffuse and specular light
 		Real wd = (mPtr->Kd[3]) / (mPtr->Kd[3] + mPtr->Ks[3]);
 		if (uniform_01(gen) - Limit::Epsilon < wd) {
-			ans.type = RE_D;
+			ans.type = DIFFUSE;
 			ans.weight = wd;
 			ans.v = sample_Diffuse_P(normal);
 			return ans;
 		}
 		else {
-			ans.type = RE_S;
+			ans.type = SPECULAR_REFLECT;
 			ans.weight = 1 - wd;
 			ans.v = sample_Specular_P(reflect(in, normal), normal, mPtr->Ns);
 			return ans;
@@ -114,25 +121,25 @@ RaySample Sampler3D::sample(const Vector3R &in, const Vector3R &normal, const Ma
 			Real w, t = 0;
 			Real rand = uniform_01(gen);
 			if (rand - Limit::Epsilon < (t += (w = mPtr->Kd[3] / total))) {
-				ans.type = RE_D;
+				ans.type = DIFFUSE;
 				ans.weight = w;
 				ans.v = sample_Diffuse_P(normal);
 				return ans;
 			}
 			else if (rand + Limit::Epsilon < (t += (w = mPtr->Ks[3] / total))) {
-				ans.type = RE_S;
+				ans.type = SPECULAR_REFLECT;
 				ans.weight = w;
 				ans.v = sample_Specular_P(reflect(in, normal), normal, mPtr->Ns);
 				return ans;
 			}
 			else if (rand - Limit::Epsilon< (t += (w = mPtr->Td[3] / total))) {
-				ans.type = TR_D;
+				ans.type = DIFFUSE;
 				ans.weight = w;
 				ans.v = sample_Diffuse_P(-normal);
 				return ans;
 			}
 			else {
-				ans.type = TR_S;
+				ans.type = SPECULAR_REFRACT_OUT;
 				ans.weight = 1 - t;
 				ans.v = sample_Specular_P(refract(in, normal, mPtr->n), normal, mPtr->Nst);
 				return ans;
@@ -143,13 +150,13 @@ RaySample Sampler3D::sample(const Vector3R &in, const Vector3R &normal, const Ma
 			// to do: fresnel
 			Real wd = (mPtr->Td[3]) / (mPtr->Td[3] + mPtr->Ts[3]);
 			if (uniform_01(gen) - Limit::Epsilon < wd) {
-				ans.type = TR_D;
+				ans.type = DIFFUSE;
 				ans.weight = wd;
 				ans.v = sample_Diffuse_P(normal);
 				return ans;
 			}
 			else {
-				ans.type = TR_S;
+				ans.type = SPECULAR_REFRACT_IN;
 				ans.weight = 1 - wd;
 				ans.v = sample_Specular_P(refract(in, normal, mPtr->n), normal, mPtr->Nst);
 				return ans;

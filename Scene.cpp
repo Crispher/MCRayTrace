@@ -84,7 +84,15 @@ void Scene::constructScene() {
 	faces.insert(faces.end(), faces_temp_nls.begin(), faces_temp_nls.end());
 
 	printf("looking for scattering mtl\n");
-	//scatterMtl = objects[0].materials["global_scatter"];
+	auto iter = objects[0].materials.find("GlobalScatter");
+	if (iter == objects[0].materials.end()) {
+		printf("No scattering media.\n");
+		scatterMtl = nullptr;
+	}
+	else {
+		scatterMtl = objects[0].materials["GlobalScatter"];
+		scatterMtl->setScatter();
+	}
 	printf("Scene construction complete, %d faces\n", faces.size());
 	objects.clear();
 }

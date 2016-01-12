@@ -6,6 +6,8 @@
 #include "Kdtree.h"
 #include "Sampler.h"
 
+
+
 class RayTracer {
 public:
 	RayTracer(Scene*, std::string intersectionTester, int _depth);
@@ -22,5 +24,6 @@ private:
 	IntersectionTester *intersectionTesterPtr;
 	Sampler3D *samplerPtr;
 	int depth;
-};
 
+	RayType lastRayType;
+};

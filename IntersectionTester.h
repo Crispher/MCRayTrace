@@ -12,7 +12,7 @@ protected:
 	std::default_random_engine gen;
 
 	std::uniform_real_distribution<Real> uniform_01 = std::uniform_real_distribution<Real>(0.0, 1.0);
-	std::exponential_distribution<Real> exponential_scatter = std::exponential_distribution<Real>(5e-1);
+	std::exponential_distribution<Real> exponential_scatter;
 
 
 public:

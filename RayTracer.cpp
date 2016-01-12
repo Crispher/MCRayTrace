@@ -21,6 +21,7 @@ RayTracer::~RayTracer() {
 }
 
 Color RayTracer::rayTrace(const Ray& ray) {
+	lastRayType = CAMERA;
 	return rayTrace(ray, depth);
 }
 Color RayTracer::rayTrace(const Ray& ray, int _depth) {
@@ -37,9 +38,11 @@ Color RayTracer::rayTrace(const Ray& ray, int _depth) {
 		return scenePtr->ambientLight;
 	}
 
+	const bool dl = true;
+
 	if (mPtr->isLightSource()) {
-		/*if (_depth < depth)
-			return Colors::black;*/
+		if (lastRayType == DIFFUSE && dl)
+			return Colors::black;
 		Color ans = Colors::white.filter(mPtr->Kd);
 		if (mPtr->isTextured()) {
 			delete mPtr;
@@ -49,14 +52,26 @@ Color RayTracer::rayTrace(const Ray& ray, int _depth) {
 	Vector3R pos = ray.source + distance * ray.direction;
 	Color ans = Colors::black;
 
-	
 	RaySample s = samplerPtr->sample(ray.direction, normal, mPtr);
-	/*Real prob;
-	ans += directLighting(pos, normal, prob).filter(mPtr->Kd);*/
 	Ray _ray(pos, s.v);
-	s.radiance = rayTrace(_ray, _depth - 1);
-	//s.radiance.scale(1 / (1 - prob));
-	ans += integrate(s, mPtr);
+	
+	if ((s.type == DIFFUSE) && dl) {
+		Real prob, scale;
+		ans += directLighting(pos, normal, prob).filter(mPtr->Kd);
+		s.radiance = rayTrace(_ray, _depth - 1);
+		if (intersectionTesterPtr->scatterMode) {
+			scale = exp(-scenePtr->scatterMtl->n * distance) / (1 - prob);
+		}
+		else {
+			scale = 1 / (1 - prob);
+		}
+		ans += integrate(s, mPtr).scale(scale);
+	}
+	else {
+		s.radiance = rayTrace(_ray, _depth - 1);
+		ans += integrate(s, mPtr);
+	}
+	lastRayType = s.type;
 	if (mPtr->isTextured()) {
 		delete mPtr;
 	}
@@ -65,13 +80,14 @@ Color RayTracer::rayTrace(const Ray& ray, int _depth) {
 
 Color RayTracer::integrate(const RaySample&s, const MaterialPtr &mPtr) {
 	switch (s.type) {
-	case RE_D:
+	case DIFFUSE:
+	case SCATTER:
 		return s.radiance.filter(mPtr->Kd, s.weight);
-	case RE_S:
+	case SPECULAR_REFLECT:
 		return s.radiance.filter(mPtr->Ks, s.weight);
-	case TR_D:
-		return s.radiance.filter(mPtr->Td, s.weight);
-	case TR_S:
+	// TRANSMISSION DIFFUSE ?
+	case SPECULAR_REFRACT_IN:
+	case SPECULAR_REFRACT_OUT:
 		return s.radiance.filter(mPtr->Ts, s.weight);
 	default:
 		return Colors::red;

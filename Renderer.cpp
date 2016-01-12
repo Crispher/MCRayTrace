@@ -36,6 +36,7 @@ Color PixelRenderer::renderPixel(int x, int y) {
 			Real offsetJ = (samples2R[i].v + y) * cameraPtr->step - cameraPtr->height / 2;
 			pixel = cameraPtr->position + cameraPtr->direction * cameraPtr->focolength + cameraPtr->right * offsetI + cameraPtr->up * offsetJ;
 			Ray ray = Ray::fromPoints(cameraPtr->position, pixel);
+			ray.source = pixel;
 			samples2R[i].value = rayTracerPtr->rayTrace(ray);
 		}
 	}
@@ -47,6 +48,7 @@ Color PixelRenderer::renderPixel(int x, int y) {
 			Vector3R focoPoint = (pixel - cameraPtr->position) * (cameraPtr->focalPlane / cameraPtr->focolength) + cameraPtr->position;
 			Vector3R samplePixel = pixel + (samples2R[i].u - 0.5) * cameraPtr->aperture * cameraPtr->right + (samples2R[i].v - 0.5) * cameraPtr->up * cameraPtr->aperture;
 			Ray ray = Ray::fromPoints(samplePixel, focoPoint);
+			ray.source = pixel;
 			samples2R[i].value = rayTracerPtr->rayTrace(ray);
 		}
 	}
@@ -155,10 +157,7 @@ void ImageRenderer::renderImage() {
 	renderImage();
 }
 
-
 void ImageRenderer::renderImageThreading(ThreadingTask &task) {
-	IntersectionTester *it;
-	
 	RayTracer mcrt(renderSetting->scenePtr, renderSetting->intersectiontester, renderSetting->rayTraceDepth);
 	PixelRenderer pr(renderSetting->cameraPtr, &mcrt, renderSetting->pixelSampler, renderSetting->pixelSampleSize);
 

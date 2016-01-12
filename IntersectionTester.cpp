@@ -156,15 +156,17 @@ void IntersectionTester::clearCache() {
 SimpleIntersectionTester::SimpleIntersectionTester(Scene * _scenePtr) {
 	scenePtr = _scenePtr;
 	sampler = new Sampler3D();
+	if (scenePtr->scatterMtl != nullptr) {
+		exponential_scatter = std::exponential_distribution<Real>(scenePtr->scatterMtl->n);
+		scatterMode = true;
+	}
+	else {
+		scatterMode = false;
+	}
 }
 
 void SimpleIntersectionTester::intersectionTest(const Ray &ray, bool &intersected, Real &distance, Vector3R &normal, MaterialPtr &mPtr) {
 	clearCache();
-	//scatterMode = false;
-	/*if (scatterMode) {
-		cacheDistance = exponential_scatter(gen);
-	}*/
-
 	int n = scenePtr->faces.size();
 	for (int i = 0; i < n; i++) {
 		basicIntersectionTest(ray, scenePtr->faces[i]);
@@ -173,6 +175,24 @@ void SimpleIntersectionTester::intersectionTest(const Ray &ray, bool &intersecte
 	for (int i = 0; i < n; i++) {
 		basicIntersectionTest(ray, scenePtr->spheres[i]);
 	}
+
+	if (scatterMode) {
+		bool ls = false;
+		if (cacheMPtr != nullptr) {
+			if (cacheMPtr->isLightSource()) {
+				ls = true;
+			}
+		}
+		Real d = exponential_scatter(gen);
+		if (d < cacheDistance && !ls) {
+			normal = sampler->sample_Diffuse_P(-ray.direction);
+			intersected = true;
+			mPtr = scenePtr->scatterMtl;
+			distance = d;
+			return;
+		}
+	}
+
 	intersected = cacheIntersected;
 	distance = cacheDistance;
 	normal = cacheNormal;
@@ -186,15 +206,6 @@ void SimpleIntersectionTester::intersectionTest(const Ray &ray, bool &intersecte
 			mPtr->Kd[2] *= textureFilterB;
 		}
 	}
-	/*if (scatterMode && !intersected && cacheDistance < 5) {
-		normal = sampler->sample_Diffuse_P(-ray.direction);
-		intersected = true;
-		mPtr = scenePtr->scatterMtl;
-		if (mPtr->Kd.size() == 0) {
-			printf("bug");
-			exit(0);
-		}
-	}*/
 }
 
 #pragma endregion
