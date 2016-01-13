@@ -142,7 +142,7 @@ public:
 	void rotate(int axis, Real angle);
 	void relocate(Real minx, Real minY, Real minz);
 	void computeNormals(bool interpolation);
-	void meshSimplify(int);
+	void meshSimplify(int, bool);
 	void scale(Real ratio);
 
 	// material information:

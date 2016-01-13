@@ -150,6 +150,7 @@
     <ClInclude Include="physics.h" />
     <ClInclude Include="RayTracer.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Sampler.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Screen.h" />
@@ -159,6 +160,7 @@
     <ClCompile Include="IntersectionTester.cpp" />
     <ClCompile Include="Kdtree.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MeshSimplify.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="physics.cpp" />
     <ClCompile Include="RayTracer.cpp" />
@@ -167,6 +169,9 @@
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Screen.cpp" />
     <ClCompile Include="volatile.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="MCRayTrace.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

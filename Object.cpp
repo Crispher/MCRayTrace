@@ -389,68 +389,6 @@ void Object::scale(Real ratio) {
 	}
 }
 
-bool collapse(F f) {
-	return f.v[0] == f.v[1] || f.v[0] == f.v[2] || f.v[1] == f.v[2];
-}
-
-struct Edge {
-	int v0, v1;
-	double length = 0;
-	Edge(int _0, int _1) { v0 = std::min(_0, _1); v1 = std::max(_0, _1); }
-};
-typedef Edge* EdgePtr;
-
-struct Comparator {
-	Comparator() {}
-	bool operator() (const EdgePtr &lhs, const EdgePtr &rhs) const {
-		return lhs->length > rhs->length;
-	}
-};
-/*
-void Object::meshSimplify(int n) {
-	std::vector<std::vector<int>> facesAdjToVertex(vertices.size());
-	std::vector<bool> faceRemain(true, faces.size());
-	for (int i = 0; i < faces.size(); i++) {
-		for (int j = 0; j < 3; j++) {
-			facesAdjToVertex[faces[i].v[j]].push_back(i);
-		}
-	}
-	// now we can access faces through vertices
-
-	std::set<Edge> edgeSet;
-	for (int i = 0; i < faces.size(); i++) {
-		edgeSet.insert(Edge(faces[i].v[0], faces[i].v[1]));
-		edgeSet.insert(Edge(faces[i].v[0], faces[i].v[2]));
-		edgeSet.insert(Edge(faces[i].v[1], faces[i].v[2]));
-	}
-	std::vector<Edge*> edgeList;
-	for (auto iter = edgeSet.begin(); iter != edgeSet.end(); iter++) {
-		edgeList.push_back(new Edge(*iter));
-	}
-	edgeSet.clear();
-	// now we have a list of edges
-
-	std::vector<std::vector<Edge*>> edgesAdjToVertex(vertices.size());
-	for (int i = 0; i < edgeList.size(); i++) {
-		edgesAdjToVertex[edgeList[i]->v0].push_back(edgeList[i]);
-		edgesAdjToVertex[edgeList[i]->v1].push_back(edgeList[i]);
-	}
-	// now we can access edges through vertices
-
-	for (int i = 0; i < edgeList.size(); i++) {
-		edgeList[i]->length = (vertices[edgeList[i]->v0].v - vertices[edgeList[i]->v1].v).norm();
-	}
-	// now we have length of each edge
-
-	Comparator comp();
-	
-	// now we have a priority queue
-
-	// ready for loop
-}
-
-*/
-
 //
 //void Object::meshSimplify(int n) {
 //	std::set<Edge> edges;
@@ -505,22 +443,8 @@ void Object::meshSimplify(int n) {
 //			edges.erase(*iter);
 //		}
 //
-//		auto rem = std::remove_if(faces.begin(), faces.end(), collapse);
-//		faces.erase(rem, faces.end());
 //	}
 //
-//	std::stringstream ss;
-//	ss << "images/" << n << "_simplifed.obj";
-//	std::string s;
-//	ss >> s;
-//	std::ofstream os(s.c_str());
-//	for (int i = 0; i < vertices.size(); ++i) {
-//		os << "v " << vertices[i].v[0] << ' ' << vertices[i].v[1] << ' ' << vertices[i].v[2] << '\n';
-//	}
-//	for (int i = 0; i < faces.size(); ++i) {
-//		os << "f " << faces[i].v[0]+1 << ' ' << faces[i].v[1]+1 << ' ' << faces[i].v[2]+1 << '\n';
-//	}
-//	os.close();
 //}
 
 #pragma endregion
