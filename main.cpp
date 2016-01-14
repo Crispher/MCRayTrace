@@ -9,8 +9,8 @@
 int main() {
 	Object object;
 	int n = object.faces.size();
-	object.load("test_data/dragon.obj");
-	object.meshSimplify(2000, false);
+	object.load("test_data/block.obj");
+	object.meshSimplify(10000, false);
 	return 0;
 	
 	
