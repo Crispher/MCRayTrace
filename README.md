@@ -1,29 +1,17 @@
 # MCRayTrace
 
-A Monte Carlo ray tracer.
+A Monte Carlo ray tracer. (See [link](https://github.com/Crispher/MCRayTrace/blob/master/report.pdf) for detailed description and sample pictures!)
   - implemented features:
     - ability to handle phong reflection and refraction
     - triangles and spheres
     - two samplers: stratified and latincube
     - kd-tree accelerator
-<<<<<<< HEAD
     - bump mapping, texture mapping
     - importance sampling, direct lighting
     - a tiny physics engine framework with partial implementation
     - scattering media
-=======
-    - bump mapping
-    - texture mapping
-    - a tiny physic engine framework with partial implementation
-    - mesh simplification
->>>>>>> mesh simplification
+    - mesh simplification using quadric error metric
     - ...
-  - dependency and environment configuration:
-    - this project builds a ray tracer from scratch however 
-      - 1) open cv is used for image io; 
-      - 2) Eigen library is used to perform vector calculations; 
-      - 3) some utilities in boost are also used.
-    - IDE: visual studio 2013, platform: windows.
   - Sample pictures (more in the images/* folder)
     - Texture mapping / depth of field
     ![alt tag](https://github.com/Crispher/MCRayTrace/blob/master/images/Image8.png)
